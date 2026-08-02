@@ -49,7 +49,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Check code
-        run: pnpm lint
+        run: pnpm ci
 
       - name: Build frontend
         run: pnpm build
