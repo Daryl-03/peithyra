@@ -63,6 +63,10 @@ sonar {
     }
 }
 
+dependencyLocking {
+    lockAllConfigurations()
+}
+
 tasks.withType<Test> {
     useJUnitPlatform()
 }
