@@ -5,8 +5,8 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-peithyra}
       POSTGRES_USER: ${POSTGRES_USER:-peithyra}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-peithyra}
-    ports:
-      - "5432:5432"
+    expose:
+      - "5432"
     volumes:
       - peithyra-postgres-data:/var/lib/postgresql
     healthcheck:
@@ -27,8 +27,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-peithyra}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-peithyra}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-peithyra}
-    ports:
-      - "8080:8080"
+    expose:
+      - "8080"
     depends_on:
       postgres:
         condition: service_healthy
@@ -47,8 +47,8 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
     depends_on:
       - backend
 
