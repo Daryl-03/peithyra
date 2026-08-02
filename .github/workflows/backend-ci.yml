@@ -52,4 +52,6 @@ jobs:
           restore-keys: ${{ runner.os }}-sonar
 
       - name: Build and test
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: ./gradlew build sonar --info
