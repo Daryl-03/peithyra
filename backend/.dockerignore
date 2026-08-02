@@ -1,0 +1,14 @@
+.gradle
+build
+.idea
+*.iml
+
+.git
+.gitignore
+
+*.log
+.env
+.env.*
+
+README.md
+compose.yaml
