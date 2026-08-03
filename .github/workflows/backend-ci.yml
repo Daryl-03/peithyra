@@ -54,4 +54,4 @@ jobs:
       - name: Build and test
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: ./gradlew build sonar --info
+        run: ./gradlew -Dorg.gradle.dependency.verification.console=verbose build sonar --info
