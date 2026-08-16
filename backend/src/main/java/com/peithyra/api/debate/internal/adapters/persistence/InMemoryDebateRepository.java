@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Repository
+@Repository()
 public class InMemoryDebateRepository implements DebateRepository {
 
     private final ConcurrentHashMap<UUID, Debate> debates = new ConcurrentHashMap<>();
