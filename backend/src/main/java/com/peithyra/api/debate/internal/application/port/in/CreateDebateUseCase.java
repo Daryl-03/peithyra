@@ -29,7 +29,6 @@ public class CreateDebateUseCase {
                 debate.getProposition(),
                 debate.getDescription(),
                 DebateStatus.WAITING_FOR_OPPONENT,
-                command.side(),
                 debate.getCreatedAt()
         );
     }

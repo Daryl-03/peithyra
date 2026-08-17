@@ -11,7 +11,6 @@ public record CreateDebateResponse(
         String proposition,
         String description,
         DebateStatus status,
-        DebateSide side,
         Instant createdAt
 ) {
 }
