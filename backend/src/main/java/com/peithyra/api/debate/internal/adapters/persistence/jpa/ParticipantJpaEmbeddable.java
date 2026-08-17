@@ -33,4 +33,11 @@ public class ParticipantJpaEmbeddable {
         );
     }
 
+    public static Participant toDomain(ParticipantJpaEmbeddable participantJpaEmbeddable) {
+        return new Participant(
+                participantJpaEmbeddable.userId,
+                participantJpaEmbeddable.joinedAt,
+                participantJpaEmbeddable.side
+        );
+    }
 }

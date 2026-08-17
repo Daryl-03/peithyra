@@ -4,6 +4,7 @@ package com.peithyra.api.debate.internal.adapters.persistence.jpa;
 import com.peithyra.api.debate.internal.domain.Debate;
 import com.peithyra.api.debate.internal.domain.DebateStatus;
 import jakarta.persistence.*;
+import org.hibernate.annotations.BatchSize;
 
 import java.time.Instant;
 import java.util.List;
@@ -30,6 +31,7 @@ public class DebateJpaEntity {
             name = "debate_participants",
             joinColumns = @JoinColumn(name = "debate_id")
     )
+    @BatchSize(size = 50)
     private List<ParticipantJpaEmbeddable> participants;
 
     public DebateJpaEntity() {
@@ -100,5 +102,20 @@ public class DebateJpaEntity {
 
     public List<ParticipantJpaEmbeddable> getParticipants() {
         return participants;
+    }
+
+    public static Debate toDomain(DebateJpaEntity entity) {
+
+        return new Debate(
+                entity.id,
+                entity.proposition,
+                entity.description,
+                entity.status,
+                entity.participants.stream().map(ParticipantJpaEmbeddable::toDomain).toList(),
+                entity.createdAt,
+                entity.startedAt,
+                entity.endedAt,
+                entity.updatedAt
+        );
     }
 }

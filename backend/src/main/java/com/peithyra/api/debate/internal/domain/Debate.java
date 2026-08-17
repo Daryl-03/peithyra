@@ -29,7 +29,7 @@ public class Debate {
         this.participants = new ArrayList<>();
     }
 
-    public Debate(UUID id, String proposition, String description, DebateStatus status, Instant createdAt, Instant startedAt, DebateSide side, Instant endedAt, List<Participant> participants, Instant updatedAt) {
+    public Debate(UUID id, String proposition, String description, DebateStatus status, List<Participant> participants, Instant createdAt, Instant startedAt, Instant endedAt, Instant updatedAt) {
         this.id = id;
         this.proposition = proposition;
         this.description = description;
