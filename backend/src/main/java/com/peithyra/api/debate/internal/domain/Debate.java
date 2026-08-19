@@ -1,5 +1,8 @@
 package com.peithyra.api.debate.internal.domain;
 
+import com.peithyra.api.debate.internal.domain.exceptions.DebateSideAlreadyTakenException;
+import com.peithyra.api.debate.internal.domain.exceptions.ParticipantAlreadyJoinedException;
+
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -50,13 +53,20 @@ public class Debate {
                 .anyMatch(p -> p.userId().equals(userId));
 
         if (alreadyIn) {
-            throw new IllegalStateException("User is already a participant in this debate.");
+            throw new ParticipantAlreadyJoinedException("User is already a participant in this debate.");
+        }
+
+        boolean sideAlreadyTaken = this.participants.stream()
+                .anyMatch(p -> p.side().equals(side));
+
+        if (sideAlreadyTaken) {
+            throw new DebateSideAlreadyTakenException("Debate side is already taken.");
         }
 
         this.participants.add(new Participant(userId, Instant.now(), side));
 
         if (this.participants.size() == 2) {
-            this.status = DebateStatus.IN_PROGRESS;
+            this.status = DebateStatus.ONGOING;
             this.startedAt = Instant.now();
         }
     }

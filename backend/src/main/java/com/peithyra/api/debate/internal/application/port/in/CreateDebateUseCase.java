@@ -22,6 +22,11 @@ public class CreateDebateUseCase {
     public CreateDebateResponse execute(CreateDebateCommand command) {
         Debate debate = new Debate(UUID.randomUUID(), command.proposition(), command.description());
 
+        debate.addParticipant(
+                        command.side(),
+                        command.creatorId()
+        );
+
         repository.save(debate);
 
         return new CreateDebateResponse(

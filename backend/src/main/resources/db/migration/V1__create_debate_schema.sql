@@ -14,7 +14,7 @@ create table debates
                    'WAITING_FOR_OPPONENT',
                    'DONE',
                    'CANCELED',
-                   'IN_PROGRESS'
+                   'ONGOING'
             )
         )
 );

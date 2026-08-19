@@ -4,5 +4,5 @@ public enum DebateStatus {
     WAITING_FOR_OPPONENT,
     DONE,
     CANCELED,
-    IN_PROGRESS
+    ONGOING,
 }
