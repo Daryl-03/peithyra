@@ -8,11 +8,13 @@ import com.peithyra.api.debate.internal.application.port.out.DebateRepository;
 import com.peithyra.api.debate.internal.application.port.out.UserPort;
 import com.peithyra.api.debate.internal.domain.Debate;
 import com.peithyra.api.debate.internal.domain.Participant;
+import org.springframework.stereotype.Service;
 
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Service
 public class ListDebatesUseCase {
     private final DebateRepository debateRepository;
     private final UserPort userPort;
