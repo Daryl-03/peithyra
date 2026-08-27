@@ -9,15 +9,14 @@ import com.peithyra.api.debate.internal.application.port.in.CreateDebateUseCase;
 import com.peithyra.api.debate.internal.application.port.in.ListDebatesUseCase;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Size;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+
 
 @RestController
-@RequestMapping("/debates")
+@RequestMapping("/api/debates")
 public class DebateController {
 
     private final CreateDebateUseCase createDebateUseCase;

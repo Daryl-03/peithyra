@@ -127,7 +127,6 @@
          <trusted-key id="C89074FC8BE681B7C7EAAB6E4C5EED3C53B75933" group="org.skyscreamer" name="jsonassert" version="1.5.3"/>
          <trusted-key id="CC57399D74CD7E4768ED6FA4CA62973FBF0451C0" group="com.vaadin.external.google" name="android-json" version="0.0.20131108.vaadin1"/>
          <trusted-key id="D1436C0DBACEA48702AF97C363F1DD7753B8B315" group="^org[.]sonarsource($|([.].*))" regex="true"/>
-
          <trusted-key id="D54A395B5CF3F86EB45F6E426B1B008864323B92" group="org.antlr"/>
          <trusted-key id="DB467D22A2666D061FDD120DB5BD4591883D638C" group="com.tngtech.archunit" name="archunit" version="1.4.2"/>
          <trusted-key id="DB5D8331654BFCC24475252F30C4AFF0AF1DADE1" group="org.aspectj" name="aspectjweaver" version="1.9.25.1"/>

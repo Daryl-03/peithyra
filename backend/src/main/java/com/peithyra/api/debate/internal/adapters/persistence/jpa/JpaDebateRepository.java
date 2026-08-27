@@ -6,6 +6,7 @@ import com.peithyra.api.debate.internal.domain.Debate;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public class JpaDebateRepository implements DebateRepository {
@@ -21,6 +22,7 @@ public class JpaDebateRepository implements DebateRepository {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PagedResult<Debate> findDebatesPage(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         var debates = repository.findAll(pageable);
