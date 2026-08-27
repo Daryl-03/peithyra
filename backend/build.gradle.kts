@@ -1,5 +1,7 @@
 plugins {
     java
+    jacoco
+
     id("org.springframework.boot") version "4.1.0"
     id("io.spring.dependency-management") version "1.1.7"
     id("org.sonarqube") version "7.3.1.8318"
@@ -23,6 +25,8 @@ repositories {
 
 extra["springModulithVersion"] = "2.1.0"
 
+val mockitoAgent = configurations.create("mockitoAgent")
+
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -32,7 +36,8 @@ dependencies {
     implementation("org.flywaydb:flyway-database-postgresql")
     implementation("org.springframework.modulith:spring-modulith-observability-api")
     implementation("org.springframework.modulith:spring-modulith-starter-core")
-    implementation("org.springframework.modulith:spring-modulith-starter-jpa")
+//    implementation("org.springframework.modulith:spring-modulith-starter-jpa")
+
 //    developmentOnly("org.springframework.boot:spring-boot-docker-compose")
     runtimeOnly("org.postgresql:postgresql")
     runtimeOnly("org.springframework.modulith:spring-modulith-actuator")
@@ -48,6 +53,10 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers-junit-jupiter")
     testImplementation("org.testcontainers:testcontainers-postgresql")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    add(mockitoAgent.name, "org.mockito:mockito-core") {
+        isTransitive = false
+    }
 }
 
 dependencyManagement {
@@ -69,4 +78,19 @@ dependencyLocking {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    jvmArgs("-javaagent:${mockitoAgent.asPath}")
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+        csv.required.set(false)
+    }
+}
+
+tasks.named("sonar") {
+    dependsOn(tasks.jacocoTestReport)
 }
