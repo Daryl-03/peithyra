@@ -34,9 +34,6 @@ public class DebateJpaEntity {
     @BatchSize(size = 50)
     private List<ParticipantJpaEmbeddable> participants;
 
-    public DebateJpaEntity() {
-    }
-
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
@@ -70,34 +67,6 @@ public class DebateJpaEntity {
 
     public UUID getId() {
         return id;
-    }
-
-    public String getProposition() {
-        return proposition;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public DebateStatus getStatus() {
-        return status;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-
-    public Instant getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public Instant getStartedAt() {
-        return startedAt;
-    }
-
-    public Instant getEndedAt() {
-        return endedAt;
     }
 
     public List<ParticipantJpaEmbeddable> getParticipants() {
