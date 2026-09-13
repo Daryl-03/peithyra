@@ -3,38 +3,46 @@ import { Geist, Geist_Mono, Newsreader, Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
-const inter = Inter({subsets:['latin'],variable:'--font-sans'});
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+    variable: "--font-geist-sans",
+    subsets: ["latin"],
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+    variable: "--font-geist-mono",
+    subsets: ["latin"],
 });
 
 const newsreader = Newsreader({
-  variable: "--font-newsreader",
-  subsets: ["latin"]
+    variable: "--font-newsreader",
+    subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "Peithyra",
+    title: "Peithyra",
 };
 
 export default function RootLayout({
-  children,
+    children,
 }: Readonly<{
-  children: React.ReactNode;
+    children: React.ReactNode;
 }>) {
-  return (
-    <html
-      lang="en"
-      className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, newsreader.variable, "font-sans", inter.variable)}
-    >
-      <body className="min-h-full min-w-screen flex flex-col">{children}</body>
-    </html>
-  );
+    return (
+        <html
+            lang="en"
+            className={cn(
+                "h-full",
+                "antialiased",
+                geistSans.variable,
+                geistMono.variable,
+                newsreader.variable,
+                "font-sans",
+                inter.variable,
+            )}
+        >
+            <body className="min-h-full flex flex-col">{children}</body>
+        </html>
+    );
 }
