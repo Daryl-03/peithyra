@@ -53,7 +53,6 @@ export default function Home() {
 									A rejoindre
 								</TabsTrigger>
 								<TabsTrigger value="en_cours">En cours</TabsTrigger>
-								<TabsTrigger value="reports">Terminés</TabsTrigger>
 							</TabsList>
 						</div>
 
