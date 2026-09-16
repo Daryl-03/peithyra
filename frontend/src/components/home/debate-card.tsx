@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 
 type DebateCardProps = {
     title: string;
-    status: "looking" | "ongoing";
-    forParticipant: string;
+    status: "looking" | "ongoing" | "done" | "canceled";
+    forParticipant?: string;
     againstParticipant?: string;
     currentRound?: number;
     totalRounds?: number;
@@ -25,8 +25,18 @@ export function DebateCard({
                 {status === "ongoing" ? (
                     <>
                         <Dot color="green" />
-                        En cours - Tour {currentRound} / {totalRounds}
+                        En cours
+                        {currentRound != null && totalRounds != null && (
+                            <>
+                                {" "}
+                                - Tour {currentRound} / {totalRounds}
+                            </>
+                        )}
                     </>
+                ) : status === "done" ? (
+                    "Terminé"
+                ) : status === "canceled" ? (
+                    "Annulé"
                 ) : (
                     "Cherche une opposition"
                 )}
@@ -39,12 +49,12 @@ export function DebateCard({
                 <div className="flex items-center gap-4">
                     <div className="flex gap-2">
                         <Badge variant="for">Pour</Badge>
-                        <span>{forParticipant}</span>
+                        <span>{forParticipant ?? "Place disponible"}</span>
                     </div>
                     <MoveRight />
                     <div className="flex gap-2">
                         <Badge variant="against">Contre</Badge>
-                        <span>{againstParticipant ?? "???"}</span>
+                        <span>{againstParticipant ?? "Place disponible"}</span>
                     </div>
                 </div>
                 <Button variant="secondary" size="lg">
