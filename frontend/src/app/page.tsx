@@ -1,8 +1,8 @@
-import { Button } from "@/components/ui/button";
 import { MoveRight } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Suspense } from "react";
+import { LatestDebates } from "@/components/home/latest-debates";
 import { Header } from "@/components/layout/header";
-import { DebateCard } from "@/components/home/debate-card";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
     return (
@@ -33,47 +33,11 @@ export default function Home() {
                         Les propositions du moment
                     </h2>
 
-                    <Tabs defaultValue="tous">
-                        <div className="border-b w-full border-b-primary/10">
-                            <TabsList
-                                variant="line"
-                                className={
-                                    "border-b lg:gap-10 border-b-primary/10 "
-                                }
-                            >
-                                <TabsTrigger value="tous">Tous</TabsTrigger>
-                                <TabsTrigger value="analytics">
-                                    A rejoindre
-                                </TabsTrigger>
-                                <TabsTrigger value="en_cours">
-                                    En cours
-                                </TabsTrigger>
-                            </TabsList>
-                        </div>
-
-                        <TabsContent value="tous">
-                            <div className="flex flex-col gap-4">
-                                {[1, 2].map((id) => (
-                                    <DebateCard
-                                        key={id}
-                                        title="Le réchauffement climatique est une menace pour l'humanité"
-                                        status="looking"
-                                        forParticipant="Sarah"
-                                    />
-                                ))}
-                                <DebateCard
-                                    title="Le réchauffement climatique est une menace pour l'humanité"
-                                    status="ongoing"
-                                    forParticipant="Oswald"
-                                    currentRound={2}
-                                    totalRounds={6}
-                                />
-                            </div>
-                        </TabsContent>
-                        <TabsContent value="analytics">A rejoindre</TabsContent>
-                        <TabsContent value="en_cours">En cours</TabsContent>
-                        <TabsContent value="reports">Terminés</TabsContent>
-                    </Tabs>
+                    <Suspense
+                        fallback={<output>Chargement des débats…</output>}
+                    >
+                        <LatestDebates />
+                    </Suspense>
                 </section>
             </main>
 

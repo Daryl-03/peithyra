@@ -47,6 +47,8 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    environment:
+      BACKEND_URL: ${BACKEND_URL}
     expose:
       - "3000"
     depends_on:
