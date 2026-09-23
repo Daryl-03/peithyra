@@ -9,7 +9,7 @@ export default function Home() {
         <div className="flex flex-col flex-1 items-center max-w-6xl xl:max-w-7xl mx-auto w-full justify-center">
             <Header />
             <main className="flex-1 py-10 px-8 w-full flex flex-col gap-16">
-                <section className="flex flex-col gap-2 w-1/2 items-start">
+                <section className="flex flex-col gap-2 w-full lg:w-1/2 items-start">
                     <p className="uppercase text-muted-foreground  ">
                         Une proposition. Deux camps.
                     </p>
