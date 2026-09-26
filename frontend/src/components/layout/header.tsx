@@ -3,8 +3,11 @@ import {
     RegisterLink,
     LoginLink,
 } from "@kinde-oss/kinde-auth-nextjs/components";
+import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server"
 
 export function Header() {
+    const { isAuthenticated } = getKindeServerSession();
+
     return (
         <header className="w-full">
             <nav className="flex items-center justify-between p-8 border-b border-b-primary/10 py-4">
