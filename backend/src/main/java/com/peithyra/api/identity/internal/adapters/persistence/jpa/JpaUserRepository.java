@@ -17,11 +17,11 @@ public class JpaUserRepository implements UserRepository {
 
     @Override
     public void save(User user) {
-        repository.save(user);
+        repository.save(UserJpaEntity.fromDomain(user));
     }
 
     @Override
     public Optional<User> findByExternalId(String externalId) {
-        return repository.findByExternalId(externalId);
+        return repository.findByExternalId(externalId).map(UserJpaEntity::toDomain);
     }
 }

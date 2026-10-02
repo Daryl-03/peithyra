@@ -42,4 +42,16 @@ public class UserJpaEntity {
                 updatedAt
         );
     }
+
+    public static UserJpaEntity fromDomain(User user){
+        var entity = new UserJpaEntity();
+
+        entity.id = user.getId();
+        entity.username = user.getUsername();
+        entity.externalId = user.getExternalId();
+        entity.createdAt = user.getCreatedAt();
+        entity.updatedAt = user.getUpdatedAt();
+
+        return entity;
+    }
 }

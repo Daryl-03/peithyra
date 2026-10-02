@@ -8,6 +8,7 @@ public class User {
     private String username;
     private final String externalId;
     private final Instant createdAt;
+
     private final Instant updatedAt;
 
     public User(UUID id, String externalId) {
@@ -51,5 +52,13 @@ public class User {
 
     public String getExternalId() {
         return externalId;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public Instant getUpdatedAt() {
+        return updatedAt;
     }
 }

@@ -36,6 +36,8 @@ dependencies {
     implementation("org.flywaydb:flyway-database-postgresql")
     implementation("org.springframework.modulith:spring-modulith-observability-api")
     implementation("org.springframework.modulith:spring-modulith-starter-core")
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    testImplementation("org.springframework.security:spring-security-test")
 //    implementation("org.springframework.modulith:spring-modulith-starter-jpa")
 
 //    developmentOnly("org.springframework.boot:spring-boot-docker-compose")
