@@ -6,28 +6,28 @@ import java.util.UUID;
 public class User {
     private final UUID id;
     private String username;
-    private final String external_id;
+    private final String externalId;
     private final Instant createdAt;
     private final Instant updatedAt;
 
     public User(UUID id, String externalId) {
         this.id = id;
-        external_id = externalId;
+        this.externalId = externalId;
         createdAt = Instant.now();
         updatedAt = Instant.now();
     }
 
-    public User(UUID id, String external_id, String username) {
+    public User(UUID id, String externalId, String username) {
         this.id = id;
-        this.external_id = external_id;
+        this.externalId = externalId;
         setUsername(username);
         createdAt = Instant.now();
         updatedAt = Instant.now();
     }
 
-    public User(UUID id, String external_id, Instant createdAt, Instant updatedAt, String username) {
+    public User(UUID id, String username, String externalId, Instant createdAt, Instant updatedAt) {
         this.id = id;
-        this.external_id = external_id;
+        this.externalId = externalId;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         setUsername(username);
@@ -49,7 +49,7 @@ public class User {
         return id;
     }
 
-    public String getExternal_id() {
-        return external_id;
+    public String getExternalId() {
+        return externalId;
     }
 }
