@@ -2,7 +2,7 @@ package com.peithyra.api.identity.internal.adapters.web.config;
 
 import com.peithyra.api.identity.web.exceptions.OnboardingRequiredException;
 import com.peithyra.api.identity.UserView;
-import com.peithyra.api.identity.internal.application.port.in.GetUserUseCase;
+import com.peithyra.api.identity.GetUserUseCase;
 import com.peithyra.api.identity.web.CurrentUser;
 import org.jspecify.annotations.Nullable;
 import org.springframework.core.MethodParameter;

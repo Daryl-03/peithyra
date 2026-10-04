@@ -38,7 +38,7 @@ dependencies {
     implementation("org.springframework.modulith:spring-modulith-starter-core")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-security-oauth2-resource-server")
-    testImplementation("org.springframework.security:spring-security-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-security-test")
 //    implementation("org.springframework.modulith:spring-modulith-starter-jpa")
 
 //    developmentOnly("org.springframework.boot:spring-boot-docker-compose")

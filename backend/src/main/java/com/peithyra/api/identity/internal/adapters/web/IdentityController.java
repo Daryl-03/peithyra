@@ -2,7 +2,7 @@ package com.peithyra.api.identity.internal.adapters.web;
 
 import com.peithyra.api.identity.UserView;
 import com.peithyra.api.identity.internal.application.port.in.CreateUserUseCase;
-import com.peithyra.api.identity.internal.application.port.in.GetUserUseCase;
+import com.peithyra.api.identity.GetUserUseCase;
 import com.peithyra.api.identity.web.CurrentUser;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
