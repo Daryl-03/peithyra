@@ -37,6 +37,7 @@ dependencies {
     implementation("org.springframework.modulith:spring-modulith-observability-api")
     implementation("org.springframework.modulith:spring-modulith-starter-core")
     implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.boot:spring-boot-starter-security-oauth2-resource-server")
     testImplementation("org.springframework.security:spring-security-test")
 //    implementation("org.springframework.modulith:spring-modulith-starter-jpa")
 

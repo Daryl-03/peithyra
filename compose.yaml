@@ -27,6 +27,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-peithyra}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-peithyra}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-peithyra}
+      KINDE_ISSUER_URI: ${KINDE_ISSUER_URI}
+      KINDE_JWK_SET_URI: ${KINDE_JWK_SET_URI}
     expose:
       - "8080"
     depends_on:
