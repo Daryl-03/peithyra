@@ -1,5 +1,7 @@
 package com.peithyra.api.identity.internal.application.port.in;
 
+import com.peithyra.api.identity.UserView;
+import com.peithyra.api.identity.internal.application.dto.UserViewMapper;
 import com.peithyra.api.identity.internal.application.port.out.UserRepository;
 import com.peithyra.api.identity.internal.domain.User;
 import org.springframework.stereotype.Service;
@@ -15,9 +17,9 @@ public class CreateUserUseCase {
         this.userRepository = userRepository;
     }
 
-    public User execute(String username, String externalId){
-        User newUser = new User(UUID.randomUUID(), username, externalId);
+    public UserView execute(String username, String externalId){
+        User newUser = new User(UUID.randomUUID(), externalId, username);
         userRepository.save(newUser);
-        return newUser;
+        return UserViewMapper.toView(newUser);
     }
 }
