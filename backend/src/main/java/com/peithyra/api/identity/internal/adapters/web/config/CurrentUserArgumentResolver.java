@@ -36,7 +36,7 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
 
         String externalId = authentication.getToken().getSubject();
 
-        return getUserUseCase.execute(externalId).orElseThrow(OnboardingRequiredException::new);
+        return getUserUseCase.execute(externalId).orElseThrow(() -> new OnboardingRequiredException("User not found. Onboarding required."));
     }
 
 }

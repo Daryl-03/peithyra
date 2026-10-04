@@ -3,7 +3,7 @@ package com.peithyra.api.identity.internal.application.port.in;
 import com.peithyra.api.identity.UserView;
 import com.peithyra.api.identity.internal.application.dto.UserViewMapper;
 import com.peithyra.api.identity.internal.application.port.out.UserRepository;
-import com.peithyra.api.identity.internal.domain.User;
+
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
