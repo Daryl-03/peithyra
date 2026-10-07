@@ -29,11 +29,6 @@ export const createProfile = authedClient
                 "Ce pseudo ou ce compte est déjà enregistré. Essayez un autre pseudo ou revenez aux débats.",
             );
         }
-        if (response.status === 401) {
-            throw new ActionError(
-                "Votre session a expiré. Reconnectez-vous pour continuer.",
-            );
-        }
         if (!response.ok) {
             throw new Error(
                 `Profile creation failed with status ${response.status}`,
@@ -41,5 +36,5 @@ export const createProfile = authedClient
         }
 
         revalidatePath("/", "layout");
-        redirect("/");
+        redirect("/agora");
     });
