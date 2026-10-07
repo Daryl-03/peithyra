@@ -59,14 +59,6 @@ export default async function OnboardingPage() {
 						</a>
 					</div>
 				)}
-				<div className="mt-8 text-center">
-					<Link
-						href="/"
-						className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-					>
-						Revenir aux débats
-					</Link>
-				</div>
 			</section>
 		</main>
 	);
