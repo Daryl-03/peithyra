@@ -44,19 +44,19 @@ export default function RootLayout({
             )}
         >
             <body className="min-h-screen flex flex-col flex-1 items-center max-w-6xl xl:max-w-7xl mx-auto w-full justify-center">
-				<Header />
-				
-				{children}
+                <Header />
 
-				<footer className="w-full">
-                <div className="flex items-center justify-between p-8 border-t border-t-primary/10 py-4">
-                    <p className="text-muted-foreground text-sm">
-                        Peithyra &copy; {new Date().getFullYear()} - Tous droits
-                        réservés
-                    </p>
-                </div>
-            </footer>
-			</body>
+                {children}
+
+                <footer className="w-full">
+                    <div className="flex items-center justify-between p-8 border-t border-t-primary/10 py-4">
+                        <p className="text-muted-foreground text-sm">
+                            Peithyra &copy; {new Date().getFullYear()} - Tous
+                            droits réservés
+                        </p>
+                    </div>
+                </footer>
+            </body>
         </html>
     );
 }
