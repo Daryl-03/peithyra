@@ -5,6 +5,7 @@ import type * as React from "react";
 
 function Label({ className, ...props }: React.ComponentProps<"label">) {
     return (
+        // biome-ignore lint/a11y/noLabelWithoutControl: Will be provided by the fieldset/legend or the input element
         <label
             data-slot="label"
             className={cn(
