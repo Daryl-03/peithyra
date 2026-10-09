@@ -7,12 +7,17 @@ import com.peithyra.api.debate.internal.application.dto.ListDebateCommand;
 import com.peithyra.api.debate.internal.application.dto.PagedResult;
 import com.peithyra.api.debate.internal.application.port.in.CreateDebateUseCase;
 import com.peithyra.api.debate.internal.application.port.in.ListDebatesUseCase;
+import com.peithyra.api.config.security.SecurityConfig;
 import com.peithyra.api.debate.internal.domain.DebateSide;
 import com.peithyra.api.debate.internal.domain.DebateStatus;
+import com.peithyra.api.identity.GetUserUseCase;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -23,13 +28,22 @@ import java.util.UUID;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = DebateController.class)
+@Import(SecurityConfig.class)
+@ActiveProfiles("test")
 public class DebateControllerTest {
+
+    @MockitoBean
+    private JwtDecoder jwtDecoder;
+
+    @MockitoBean
+    private GetUserUseCase getUserUseCase;
 
     @Autowired
     private MockMvc mockMvc;
@@ -39,7 +53,6 @@ public class DebateControllerTest {
 
     @MockitoBean
     private ListDebatesUseCase listDebatesUseCase;
-
 
     @Test
     void shouldReturnCreatedWhenDebateIsCreated() throws Exception {
@@ -73,6 +86,7 @@ public class DebateControllerTest {
                 """, expectedCommand.proposition(), expectedCommand.description(), creatorId);
 
         mockMvc.perform(post("/api/debates")
+                        .with(jwt().jwt(token -> token.subject("kinde-user-id")))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody)
                 ).andExpect(status().isCreated())
@@ -97,6 +111,7 @@ public class DebateControllerTest {
                 """.formatted(UUID.randomUUID());
 
         mockMvc.perform(post("/api/debates")
+                        .with(jwt().jwt(token -> token.subject("kinde-user-id")))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().isBadRequest());
