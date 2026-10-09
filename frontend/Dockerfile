@@ -27,7 +27,15 @@ COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN pnpm build
+# Kinde validates configuration during module loading. These placeholders are
+# only for the build; real configuration is injected into the runner by Compose.
+RUN KINDE_ISSUER_URL=https://build.example.invalid \
+    KINDE_CLIENT_ID=build-placeholder \
+    KINDE_CLIENT_SECRET=build-placeholder \
+    KINDE_SITE_URL=http://localhost:3000 \
+    KINDE_POST_LOGIN_REDIRECT_URL=http://localhost:3000/api/auth/complete \
+    KINDE_POST_LOGOUT_REDIRECT_URL=http://localhost:3000 \
+    pnpm build
 
 
 # Runtime stage
