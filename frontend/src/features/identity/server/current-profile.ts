@@ -1,6 +1,7 @@
 import "server-only";
 
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 import { z } from "zod";
 import { backendFetch } from "@/lib/backend-fetch";
 
@@ -37,6 +38,8 @@ export async function getCurrentProfile(): Promise<ProfileState> {
 }
 
 export async function requireOnboardedUser() {
+    await connection();
+
     const result = await getCurrentProfile();
     if (result.status === "unauthorized") redirect("/api/auth/login");
     if (result.status === "missing") redirect("/onboarding");

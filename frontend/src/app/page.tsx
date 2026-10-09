@@ -1,11 +1,14 @@
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { MoveRight } from "lucide-react";
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 import { Suspense } from "react";
 import { LatestDebates } from "@/components/home/latest-debates";
 import { Button } from "@/components/ui/button";
 
 export default async function Home() {
+    await connection();
+
     const { isAuthenticated } = getKindeServerSession();
 
     if (await isAuthenticated()) {

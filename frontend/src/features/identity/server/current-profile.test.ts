@@ -6,6 +6,7 @@ vi.mock("@/lib/backend-fetch", () => ({ backendFetch: vi.fn() }));
 
 const { redirectMock } = vi.hoisted(() => ({ redirectMock: vi.fn() }));
 vi.mock("next/navigation", () => ({ redirect: redirectMock }));
+vi.mock("next/server", () => ({ connection: vi.fn(async () => {}) }));
 
 const backendFetchMock = vi.mocked(backendFetch);
 const profile = {
