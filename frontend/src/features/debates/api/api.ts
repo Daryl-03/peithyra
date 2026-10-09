@@ -1,5 +1,5 @@
-import { DebateSummary } from "../model/debate-summary";
-import { DebateSummaryDTO } from "./debate-summary-dto";
+import type { DebateSummary } from "../model/debate-summary";
+import type { DebateSummaryDTO } from "./debate-summary-dto";
 
 export async function getLatestDebates(
     limit: number,

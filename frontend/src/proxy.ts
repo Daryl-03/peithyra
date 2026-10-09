@@ -1,5 +1,5 @@
 import { withAuth } from "@kinde-oss/kinde-auth-nextjs/middleware";
-import { NextRequest } from "next/dist/server/web/spec-extension/request";
+import type { NextRequest } from "next/dist/server/web/spec-extension/request";
 
 export default withAuth(async function proxy(req: NextRequest) {}, {
     // Proxy still runs on all routes, but doesn't protect the home route
