@@ -7,5 +7,6 @@ import java.util.Optional;
 
 public interface UserRepository {
     void save(User user);
+    boolean existsByUsernameIgnoreCase(String username);
     Optional<User> findByExternalId(String externalId);
 }

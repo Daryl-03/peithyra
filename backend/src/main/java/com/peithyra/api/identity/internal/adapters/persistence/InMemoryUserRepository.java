@@ -17,6 +17,11 @@ public class InMemoryUserRepository implements UserRepository {
     }
 
     @Override
+    public boolean existsByUsernameIgnoreCase(String username) {
+        return users.values().stream().anyMatch(user -> username.equalsIgnoreCase(user.getUsername()));
+    }
+
+    @Override
     public Optional<User> findByExternalId(String externalId) {
         return users.values().stream()
                 .filter(user -> user.getExternalId().equals(externalId) )

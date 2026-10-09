@@ -40,7 +40,7 @@ public class User {
 
     public void setUsername(String username) {
         if (username.isBlank() || username.length() <= 4) {
-            throw new IllegalArgumentException("Username should be at least 4 characters long");
+            throw new IllegalArgumentException("Username should be at least 5 characters long");
         }
         this.username = username;
     }
