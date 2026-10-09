@@ -5,7 +5,7 @@ import { z } from "zod";
 import { backendFetch } from "@/lib/backend-fetch";
 
 const profileSchema = z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     username: z.string(),
 });
 
