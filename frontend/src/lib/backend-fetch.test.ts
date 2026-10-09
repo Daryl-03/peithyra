@@ -121,22 +121,19 @@ test("redirects to onboarding when the backend explicitly requires it", async ()
 test.each([
     [401, "UNAUTHORIZED"],
     [403, "ONBOARDING_REQUIRED"],
-])(
-    "returns HTTP %i unchanged when redirects are disabled",
-    async (status, code) => {
-        getAccessTokenRawMock.mockResolvedValue("test-token");
-        const backendResponse = Response.json({ code }, { status });
-        fetchMock.mockResolvedValue(backendResponse);
-        const response = await backendFetch(
-            "/identity/me",
-            {},
-            { redirectOnAuthError: false },
-        );
-        expect(response).toBe(backendResponse);
-        expect(await response.json()).toEqual({ code });
-        expect(redirectMock).not.toHaveBeenCalled();
-    },
-);
+])("returns HTTP %i unchanged when redirects are disabled", async (status, code) => {
+    getAccessTokenRawMock.mockResolvedValue("test-token");
+    const backendResponse = Response.json({ code }, { status });
+    fetchMock.mockResolvedValue(backendResponse);
+    const response = await backendFetch(
+        "/identity/me",
+        {},
+        { redirectOnAuthError: false },
+    );
+    expect(response).toBe(backendResponse);
+    expect(await response.json()).toEqual({ code });
+    expect(redirectMock).not.toHaveBeenCalled();
+});
 
 test("preserves an unrelated 403 and leaves its body readable", async () => {
     getAccessTokenRawMock.mockResolvedValue("test-token");

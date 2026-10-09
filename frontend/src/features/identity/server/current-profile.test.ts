@@ -51,17 +51,16 @@ describe("getCurrentProfile", () => {
         expect(redirectMock).not.toHaveBeenCalled();
     });
 
-    test.each([403, 404, 500, 503])(
-        "does not treat HTTP %i as a missing profile",
-        async (status) => {
-            backendFetchMock.mockResolvedValue(
-                Response.json({ code: "OTHER_ERROR" }, { status }),
-            );
+    test.each([
+        403, 404, 500, 503,
+    ])("does not treat HTTP %i as a missing profile", async (status) => {
+        backendFetchMock.mockResolvedValue(
+            Response.json({ code: "OTHER_ERROR" }, { status }),
+        );
 
-            expect(await getCurrentProfile()).toEqual({ status: "error" });
-            expect(redirectMock).not.toHaveBeenCalled();
-        },
-    );
+        expect(await getCurrentProfile()).toEqual({ status: "error" });
+        expect(redirectMock).not.toHaveBeenCalled();
+    });
 
     test.each([
         { id: "not-a-uuid", username: "Camille" },
@@ -74,16 +73,15 @@ describe("getCurrentProfile", () => {
         expect(await getCurrentProfile()).toEqual({ status: "error" });
     });
 
-    test.each([200, 403])(
-        "handles malformed JSON with HTTP %i",
-        async (status) => {
-            backendFetchMock.mockResolvedValue(
-                new Response("not JSON", { status }),
-            );
+    test.each([
+        200, 403,
+    ])("handles malformed JSON with HTTP %i", async (status) => {
+        backendFetchMock.mockResolvedValue(
+            new Response("not JSON", { status }),
+        );
 
-            expect(await getCurrentProfile()).toEqual({ status: "error" });
-        },
-    );
+        expect(await getCurrentProfile()).toEqual({ status: "error" });
+    });
 
     test("returns error when the backend is unreachable", async () => {
         backendFetchMock.mockRejectedValue(new TypeError("Failed to fetch"));
