@@ -11,6 +11,7 @@ import com.peithyra.api.config.security.SecurityConfig;
 import com.peithyra.api.debate.internal.domain.DebateSide;
 import com.peithyra.api.debate.internal.domain.DebateStatus;
 import com.peithyra.api.identity.GetUserUseCase;
+import com.peithyra.api.identity.UserView;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -23,6 +24,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.Mockito.verify;
@@ -60,6 +62,9 @@ public class DebateControllerTest {
         UUID debateId = UUID.randomUUID();
         Instant createdAt = Instant.now();
 
+        when(getUserUseCase.execute("kinde-user-id"))
+                .thenReturn(Optional.of(new UserView(creatorId, "kinde-user-id", "John Doe")));
+
         CreateDebateCommand expectedCommand = new CreateDebateCommand(
                 "Moral and law are two separate matters",
                 "This is about the relationship between moral and legal principles.",
@@ -80,10 +85,9 @@ public class DebateControllerTest {
                 {
                     "proposition": "%s",
                     "description": "%s",
-                    "creatorId": "%s",
                     "side": "FOR"
                 }
-                """, expectedCommand.proposition(), expectedCommand.description(), creatorId);
+                """, expectedCommand.proposition(), expectedCommand.description());
 
         mockMvc.perform(post("/api/debates")
                         .with(jwt().jwt(token -> token.subject("kinde-user-id")))
@@ -105,10 +109,9 @@ public class DebateControllerTest {
                 {
                     "proposition": "",
                     "description": "This description is sufficiently long.",
-                    "creatorId": "%s",
                     "side": "FOR"
                 }
-                """.formatted(UUID.randomUUID());
+                """;
 
         mockMvc.perform(post("/api/debates")
                         .with(jwt().jwt(token -> token.subject("kinde-user-id")))

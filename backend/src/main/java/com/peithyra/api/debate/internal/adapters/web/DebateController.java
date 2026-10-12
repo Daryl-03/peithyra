@@ -7,6 +7,8 @@ import com.peithyra.api.debate.internal.application.dto.ListDebateCommand;
 import com.peithyra.api.debate.internal.application.dto.PagedResult;
 import com.peithyra.api.debate.internal.application.port.in.CreateDebateUseCase;
 import com.peithyra.api.debate.internal.application.port.in.ListDebatesUseCase;
+import com.peithyra.api.identity.UserView;
+import com.peithyra.api.identity.web.CurrentUser;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import org.springframework.http.HttpStatus;
@@ -28,8 +30,8 @@ public class DebateController {
     }
 
     @PostMapping
-    public ResponseEntity<CreateDebateResponse> createDebate(@RequestBody @Valid CreateDebateRequest request) {
-        CreateDebateResponse response = createDebateUseCase.execute(request.toCommand());
+    public ResponseEntity<CreateDebateResponse> createDebate(@RequestBody @Valid CreateDebateRequest request, @CurrentUser UserView currentUser) {
+        CreateDebateResponse response = createDebateUseCase.execute(request.toCommand(currentUser.id()));
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

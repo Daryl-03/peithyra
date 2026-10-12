@@ -17,11 +17,9 @@ public record CreateDebateRequest(
     @Size(min = 15, max = 200)
     String description,
     @NotNull
-    UUID creatorId,
-    @NotNull
     DebateSide side
 ) {
-    public CreateDebateCommand toCommand(){
+    public CreateDebateCommand toCommand(UUID creatorId) {
         return new CreateDebateCommand(proposition, description, creatorId, side);
     }
 }
