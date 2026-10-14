@@ -41,18 +41,21 @@ class JpaUserRepositoryIntegrationTest {
     }
     @Test void databaseRejectsDuplicateUsernameIgnoringCaseWithoutPrecheck() {
         repository.save(new User(UUID.randomUUID(), "kinde-1", "Alice"));
+        var randomId = UUID.randomUUID();
         assertThrows(ProfileConflictException.class,
-                () -> repository.save(new User(UUID.randomUUID(), "kinde-2", "ALICE")));
+                () -> repository.save(new User(randomId, "kinde-2", "ALICE")));
         assertTrue(repository.findByExternalId("kinde-2").isEmpty());
     }
     @Test void databaseRejectsDuplicateIdentityWithoutPrecheck() {
         repository.save(new User(UUID.randomUUID(), "kinde-1", "Alice"));
+        var randomId = UUID.randomUUID();
         assertThrows(ProfileConflictException.class,
-                () -> repository.save(new User(UUID.randomUUID(), "kinde-1", "Camille")));
+                () -> repository.save(new User(randomId, "kinde-1", "Camille")));
         assertEquals("Alice", repository.findByExternalId("kinde-1").orElseThrow().getUsername());
     }
     @Test void unrelatedIntegrityErrorsAreNotReportedAsConflicts() {
+        var randomId = UUID.randomUUID();
         assertThrows(DataIntegrityViolationException.class,
-                () -> repository.save(new User(UUID.randomUUID(), null, "Alice")));
+                () -> repository.save(new User(randomId, null, "Alice")));
     }
 }

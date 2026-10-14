@@ -10,6 +10,7 @@ import com.peithyra.api.debate.internal.domain.Debate;
 import com.peithyra.api.debate.internal.domain.Participant;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -26,6 +27,10 @@ public class ListDebatesUseCase {
 
     public PagedResult<DebateSummary> execute(ListDebateCommand command) {
         PagedResult<Debate> debatesPage = debateRepository.findDebatesPage(command.page(), command.size());
+
+        if(debatesPage == null || debatesPage.content() == null || debatesPage.content().isEmpty()) {
+            return new PagedResult<>(List.of(), command.page(), command.size(), 0, 0);
+        }
 
         var participantsIds = debatesPage.content().stream()
                 .flatMap(
@@ -49,9 +54,9 @@ public class ListDebatesUseCase {
                                                 participantUsernames.getOrDefault(participant.userId(), "unknown"),
                                                 participant.side()
                                         ))
-                                        .collect(Collectors.toList())
+                                        .toList()
                         ))
-                        .collect(Collectors.toList()),
+                        .toList(),
                 debatesPage.page(),
                 debatesPage.size(),
                 debatesPage.totalElements(),

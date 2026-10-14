@@ -15,11 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/identity")
 public class IdentityController {
 
-    private final GetUserUseCase getUserUseCase;
     private final CreateUserUseCase createUserUseCase;
 
-    public IdentityController(GetUserUseCase getUserUseCase, CreateUserUseCase createUserUseCase) {
-        this.getUserUseCase = getUserUseCase;
+    public IdentityController(CreateUserUseCase createUserUseCase) {
         this.createUserUseCase = createUserUseCase;
     }
 

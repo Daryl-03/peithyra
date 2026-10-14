@@ -8,6 +8,8 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 @Import(TestcontainersConfiguration.class)
 @ActiveProfiles("test")
 @SpringBootTest
@@ -24,6 +26,7 @@ class BackendApplicationTests {
     void createApplicationModuleModel() {
         ApplicationModules modules = ApplicationModules.of(BackendApplication.class);
         modules.forEach(System.out::println);
+        assertTrue(modules.stream().findAny().isPresent());
     }
 
     @Test

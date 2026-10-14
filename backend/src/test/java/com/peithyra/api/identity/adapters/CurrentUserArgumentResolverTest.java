@@ -22,6 +22,7 @@ class CurrentUserArgumentResolverTest {
     private final GetUserUseCase getUser = mock(GetUserUseCase.class);
     private final CurrentUserArgumentResolver resolver = new CurrentUserArgumentResolver(getUser);
     private final NativeWebRequest request = mock(NativeWebRequest.class);
+//    the following method is used to test the supportsParameter method of the resolver
     void parameters(@CurrentUser UserView user, UserView plain, @CurrentUser String wrongType) {}
 
     @Test void supportsOnlyAnnotatedUserView() throws Exception {
