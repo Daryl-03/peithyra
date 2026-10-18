@@ -8,6 +8,7 @@ import com.peithyra.api.debate.internal.application.dto.PagedResult;
 import com.peithyra.api.debate.internal.application.port.in.CreateDebateUseCase;
 import com.peithyra.api.debate.internal.application.port.in.ListDebatesUseCase;
 import com.peithyra.api.config.security.SecurityConfig;
+import com.peithyra.api.debate.internal.domain.DebateFormat;
 import com.peithyra.api.debate.internal.domain.DebateSide;
 import com.peithyra.api.debate.internal.domain.DebateStatus;
 import com.peithyra.api.identity.GetUserUseCase;
@@ -65,11 +66,14 @@ public class DebateControllerTest {
         when(getUserUseCase.execute("kinde-user-id"))
                 .thenReturn(Optional.of(new UserView(creatorId, "kinde-user-id", "John Doe")));
 
+        DebateFormat debateFormat = new DebateFormat(3, 60);
+
         CreateDebateCommand expectedCommand = new CreateDebateCommand(
                 "Moral and law are two separate matters",
                 "This is about the relationship between moral and legal principles.",
                 creatorId,
-                DebateSide.FOR
+                DebateSide.FOR,
+                debateFormat
         );
 
         when(createDebateUseCase.execute(expectedCommand))
@@ -78,14 +82,17 @@ public class DebateControllerTest {
                         expectedCommand.proposition(),
                         expectedCommand.description(),
                         DebateStatus.WAITING_FOR_OPPONENT,
-                        createdAt
+                        createdAt,
+                        debateFormat
                 ));
 
         String requestBody = String.format("""
                 {
                     "proposition": "%s",
                     "description": "%s",
-                    "side": "FOR"
+                    "side": "FOR",
+                    "numberOfTurns": 3,
+                    "turnTimeLimitSeconds": 60
                 }
                 """, expectedCommand.proposition(), expectedCommand.description());
 
@@ -109,7 +116,30 @@ public class DebateControllerTest {
                 {
                     "proposition": "",
                     "description": "This description is sufficiently long.",
-                    "side": "FOR"
+                    "side": "FOR",
+                    "numberOfTurns": 3,
+                    "turnTimeLimitSeconds": 60
+                }
+                """;
+
+        mockMvc.perform(post("/api/debates")
+                        .with(jwt().jwt(token -> token.subject("kinde-user-id")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(createDebateUseCase);
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenTimeLimitIsLowerThanMinimum() throws Exception {
+        String requestBody = """
+                {
+                    "proposition": "This is a valid proposition.",
+                    "description": "This description is sufficiently long.",
+                    "side": "FOR",
+                    "numberOfTurns": 3,
+                    "turnTimeLimitSeconds": 10
                 }
                 """;
 

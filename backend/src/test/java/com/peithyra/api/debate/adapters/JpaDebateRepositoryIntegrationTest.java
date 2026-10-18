@@ -5,6 +5,7 @@ import com.peithyra.api.debate.internal.adapters.persistence.jpa.SpringDataDebat
 import com.peithyra.api.debate.internal.application.dto.PagedResult;
 import com.peithyra.api.debate.internal.application.port.out.DebateRepository;
 import com.peithyra.api.debate.internal.domain.Debate;
+import com.peithyra.api.debate.internal.domain.DebateFormat;
 import com.peithyra.api.debate.internal.domain.DebateSide;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,11 +39,13 @@ public class JpaDebateRepositoryIntegrationTest {
     void shouldSaveAndRetrieveDebateWithParticipants() {
         UUID debateId = UUID.randomUUID();
         UUID creatorId = UUID.randomUUID();
+        DebateFormat format = new DebateFormat(3, 60);
 
         Debate debate = new Debate(
                 debateId,
                 "Moral and law are two separate matters",
-                "A debate about moral and legal principles."
+                "A debate about moral and legal principles.",
+                format
         );
 
         debate.addParticipant(DebateSide.FOR, creatorId);
@@ -61,7 +64,8 @@ public class JpaDebateRepositoryIntegrationTest {
                         retrievedDebate.getParticipants()
                                 .getFirst()
                                 .userId()
-                )
+                ),
+                () -> assertEquals(format, retrievedDebate.getFormat())
         );
     }
 }
