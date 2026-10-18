@@ -1,7 +1,16 @@
+import { MoveRight } from "lucide-react";
 import type { Metadata } from "next";
-
 import { Suspense } from "react";
 import { LatestDebates } from "@/components/home/latest-debates";
+import { Button } from "@/components/ui/button";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
+import { NewDebateForm } from "@/features/agora/components/new-debate-form";
 import { requireOnboardedUser } from "@/features/identity/server/current-profile";
 
 export const metadata: Metadata = { title: "Agora | Peithyra" };
@@ -20,10 +29,34 @@ export default async function AgoraPage() {
                 </p>
             </div>
 
-            <section aria-labelledby="debates-title">
-                <h2 id="debates-title" className="mb-5 text-xl font-medium">
-                    Les propositions du moment
-                </h2>
+            <section aria-labelledby="debates-title" className="space-y-3">
+                <div className="flex items-center  justify-between">
+                    <h2 id="debates-title" className="text-xl font-medium">
+                        Les propositions du moment
+                    </h2>
+
+                    <Dialog>
+                        <DialogTrigger
+                            render={
+                                <Button
+                                    variant="default"
+                                    size="lg"
+                                    className=""
+                                >
+                                    Lancer une proposition
+                                    <MoveRight />
+                                </Button>
+                            }
+                        ></DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>New debate</DialogTitle>
+                            </DialogHeader>
+
+                            <NewDebateForm />
+                        </DialogContent>
+                    </Dialog>
+                </div>
                 <Suspense
                     fallback={
                         <output className="block py-8 text-muted-foreground">
