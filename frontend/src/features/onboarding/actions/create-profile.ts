@@ -3,8 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { InferSafeActionFnResult } from "next-safe-action";
-import { backendFetch } from "@/lib/backend-fetch";
-import { ActionError, authedClient } from "@/lib/safe-action";
+import { backendFetch } from "@/lib/apis/backend-fetch";
+import { ActionError, authedClient } from "@/lib/apis/safe-action";
 import { onboardingFormSchema } from "../model/onboarding-schema";
 
 export type CreateProfileActionResult = InferSafeActionFnResult<

@@ -3,7 +3,7 @@ import "server-only";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { z } from "zod";
-import { backendFetch } from "@/lib/backend-fetch";
+import { backendFetch } from "@/lib/apis/backend-fetch";
 
 const profileSchema = z.object({
     id: z.uuid(),

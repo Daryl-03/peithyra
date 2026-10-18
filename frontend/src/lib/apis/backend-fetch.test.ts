@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
-import { backendFetch } from "./backend-fetch";
+import { backendFetch } from "../apis/backend-fetch";
 
 const { fetchMock } = vi.hoisted(() => ({
     fetchMock: vi.fn<typeof fetch>(),
