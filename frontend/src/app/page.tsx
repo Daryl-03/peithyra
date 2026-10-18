@@ -3,8 +3,9 @@ import { MoveRight } from "lucide-react";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { LatestDebates } from "@/components/home/latest-debates";
+
 import { Button } from "@/components/ui/button";
+import { LatestDebates } from "@/features/home/components/latest-debates";
 
 export default async function Home() {
     await connection();

@@ -1,7 +1,8 @@
-import { DebateList } from "@/components/home/debate-list";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getLatestDebates } from "@/features/debates/api/api";
 import type { DebateSummary } from "@/features/debates/model/debate-summary";
+import { DebateList } from "./debate-list";
 
 export async function LatestDebates() {
     let debates: DebateSummary[];
