@@ -67,9 +67,7 @@ public class DebateTest {
         debate.addParticipant(DebateSide.AGAINST, UUID.randomUUID());
 
         var randomUserId = UUID.randomUUID();
-        assertThrows(IllegalStateException.class, () -> {
-            debate.addParticipant(DebateSide.FOR, randomUserId);
-        });
+        assertThrows(IllegalStateException.class, () -> debate.addParticipant(DebateSide.FOR, randomUserId));
     }
 
     @Test
