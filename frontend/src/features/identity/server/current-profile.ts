@@ -22,6 +22,7 @@ export async function getCurrentProfile(): Promise<ProfileState> {
             { cache: "no-store", signal: AbortSignal.timeout(10000) },
             { redirectOnAuthError: false },
         );
+		console.log("getCurrentProfile response status:", response.status);
         if (response.status === 401) return { status: "unauthorized" };
         if (response.status === 403) {
             const error = await response.json();
@@ -31,6 +32,7 @@ export async function getCurrentProfile(): Promise<ProfileState> {
         if (!response.ok) return { status: "error" };
 
         const profile = profileSchema.parse(await response.json());
+		console.log("getCurrentProfile profile:", profile);
         return { status: "ready", profile };
     } catch {
         return { status: "error" };

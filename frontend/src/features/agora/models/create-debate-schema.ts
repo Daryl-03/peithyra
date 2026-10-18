@@ -1,17 +1,18 @@
 import z from "zod";
+import { DebateSide } from "./debate-side";
 
-export const createDebateSchema = z.object({
+export const createDebateFormSchema = z.object({
     proposition: z
         .string()
         .trim()
-        .min(15, "Le titre doit contenir au moins 5 caractères.")
+        .min(15, "Le titre doit contenir au moins 15 caractères.")
         .max(100, "Le titre doit contenir au maximum 100 caractères."),
     description: z
         .string()
         .trim()
         .min(10, "La description doit contenir au moins 10 caractères.")
         .max(200, "La description doit contenir au maximum 200 caractères."),
-    side: z.enum(["For", "Against"], "Vous devez choisir un camp."),
+    side: z.enum(DebateSide, "Vous devez choisir un camp."),
     numberOfTurns: z
         .number()
         .int()
@@ -27,7 +28,7 @@ export const createDebateSchema = z.object({
 export const defaultCreateDebateValues = {
     proposition: "",
     description: "",
-    side: "For" as const,
+    side: DebateSide.For,
     numberOfTurns: 3,
-    turnTimeLimitSeconds: 120,
+    turnTimeLimitSeconds: 180,
 };

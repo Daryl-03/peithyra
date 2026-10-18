@@ -1,16 +1,7 @@
-import { MoveRight } from "lucide-react";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { LatestDebates } from "@/components/home/latest-debates";
-import { Button } from "@/components/ui/button";
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog";
-import { NewDebateForm } from "@/features/agora/components/new-debate-form";
+import { NewDebateDialog } from "@/features/agora/components/new-debate-dialog";
 import { requireOnboardedUser } from "@/features/identity/server/current-profile";
 
 export const metadata: Metadata = { title: "Agora | Peithyra" };
@@ -35,27 +26,7 @@ export default async function AgoraPage() {
                         Les propositions du moment
                     </h2>
 
-                    <Dialog>
-                        <DialogTrigger
-                            render={
-                                <Button
-                                    variant="default"
-                                    size="lg"
-                                    className=""
-                                >
-                                    Lancer une proposition
-                                    <MoveRight />
-                                </Button>
-                            }
-                        ></DialogTrigger>
-                        <DialogContent>
-                            <DialogHeader>
-                                <DialogTitle>New debate</DialogTitle>
-                            </DialogHeader>
-
-                            <NewDebateForm />
-                        </DialogContent>
-                    </Dialog>
+                    <NewDebateDialog />
                 </div>
                 <Suspense
                     fallback={
