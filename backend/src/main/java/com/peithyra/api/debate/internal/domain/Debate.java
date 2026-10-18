@@ -20,12 +20,14 @@ public class Debate {
     private Instant updatedAt;
     private Instant startedAt;
     private Instant endedAt;
+    private DebateFormat format;
     private final List<Participant> participants;
 
-    public Debate(UUID id, String proposition, String description) {
+    public Debate(UUID id, String proposition, String description, DebateFormat format) {
         this.id = id;
         this.proposition = proposition;
         this.description = description;
+        this.format = format;
         this.createdAt = Instant.now();
         this.updatedAt = Instant.now();
         this.endedAt = null;
@@ -118,6 +120,10 @@ public class Debate {
         return endedAt;
     }
 
+    public DebateFormat getFormat() {
+        return format;
+    }
+
     public static class ReconstructBuilder {
         private final UUID id;
         private final String proposition;
@@ -128,6 +134,7 @@ public class Debate {
         private Instant startedAt;
         private Instant endedAt;
         private Instant updatedAt;
+        private DebateFormat format;
 
         public ReconstructBuilder(UUID id, String proposition, String description, Instant createdAt) {
             this.id = id;
@@ -161,6 +168,11 @@ public class Debate {
             return this;
         }
 
+        public ReconstructBuilder withFormat(DebateFormat format) {
+            this.format = format;
+            return this;
+        }
+
         public Debate build() {
             Objects.requireNonNull(id, "id is required for reconstruction");
             Objects.requireNonNull(proposition, "proposition is required for reconstruction");
@@ -168,6 +180,7 @@ public class Debate {
             Objects.requireNonNull(status, "status is required for reconstruction");
             Objects.requireNonNull(participants, "participants is required for reconstruction");
             Objects.requireNonNull(updatedAt, "updatedAt is required for reconstruction");
+            Objects.requireNonNull(format, "format is required for reconstruction");
 
             Debate debate = new Debate(id, proposition, description, createdAt);
             debate.status = this.status;
@@ -175,6 +188,7 @@ public class Debate {
             debate.startedAt = this.startedAt;
             debate.endedAt = this.endedAt;
             debate.updatedAt = this.updatedAt;
+            debate.format = this.format;
             return debate;
         }
 
