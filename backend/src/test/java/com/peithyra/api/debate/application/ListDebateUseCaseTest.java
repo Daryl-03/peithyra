@@ -7,6 +7,7 @@ import com.peithyra.api.debate.internal.application.port.in.ListDebatesUseCase;
 import com.peithyra.api.debate.internal.application.port.out.DebateRepository;
 import com.peithyra.api.debate.internal.application.port.out.UserPort;
 import com.peithyra.api.debate.internal.domain.Debate;
+import com.peithyra.api.debate.internal.domain.DebateFormat;
 import com.peithyra.api.debate.internal.domain.DebateSide;
 import org.junit.jupiter.api.Test;
 
@@ -35,11 +36,13 @@ public class ListDebateUseCaseTest {
     void shouldListDebatesWithParticipants() {
         UUID firstUserId = UUID.randomUUID();
         UUID secondUserId = UUID.randomUUID();
+        DebateFormat format = new DebateFormat(3, 60);
 
         Debate debate = new Debate(
                 UUID.randomUUID(),
                 "Moral and law are two separate matters",
-                "A debate about moral and legal principles."
+                "A debate about moral and legal principles.",
+                format
         );
 
         debate.addParticipant(DebateSide.FOR, firstUserId);
@@ -94,11 +97,13 @@ public class ListDebateUseCaseTest {
     @Test
     void shouldUseUnknownWhenParticipantUsernameIsMissing() {
         UUID userId = UUID.randomUUID();
+        DebateFormat format = new DebateFormat(3, 60);
 
         Debate debate = new Debate(
                 UUID.randomUUID(),
                 "Moral and law are two separate matters",
-                "A debate about moral and legal principles."
+                "A debate about moral and legal principles.",
+                format
         );
 
         debate.addParticipant(DebateSide.FOR, userId);

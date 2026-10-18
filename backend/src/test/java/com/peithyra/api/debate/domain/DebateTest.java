@@ -2,6 +2,7 @@ package com.peithyra.api.debate.domain;
 
 
 import com.peithyra.api.debate.internal.domain.Debate;
+import com.peithyra.api.debate.internal.domain.DebateFormat;
 import com.peithyra.api.debate.internal.domain.DebateSide;
 import com.peithyra.api.debate.internal.domain.DebateStatus;
 import com.peithyra.api.debate.internal.domain.exceptions.DebateSideAlreadyTakenException;
@@ -16,10 +17,12 @@ public class DebateTest {
 
     @Test
     void shouldBeWaitingForOpponentWhenCreated() {
+        DebateFormat format = new DebateFormat(3, 60);
         Debate debate = new Debate(
                 UUID.randomUUID(),
                 "random prop",
-                ""
+                "",
+                format
         );
 
         assertAll(
@@ -32,10 +35,12 @@ public class DebateTest {
 
     @Test
     void shouldStartDebateWhenSecondParticipantJoins() {
+        DebateFormat format = new DebateFormat(3, 60);
         Debate debate = new Debate(
                 UUID.randomUUID(),
                 "Naruto is the best manga",
-                ""
+                "",
+                format
         );
 
         debate.addParticipant(DebateSide.FOR, UUID.randomUUID());
@@ -50,27 +55,29 @@ public class DebateTest {
 
     @Test
     void shouldNotAllowAddingParticipantWhenDebateIsNotWaitingForOpponent() {
+        DebateFormat format = new DebateFormat(3, 60);
         Debate debate = new Debate(
                 UUID.randomUUID(),
                 "Training AI on copyrighted data is copyright infringement.",
-                ""
+                "",
+                format
         );
 
         debate.addParticipant(DebateSide.FOR, UUID.randomUUID());
         debate.addParticipant(DebateSide.AGAINST, UUID.randomUUID());
 
         var randomUserId = UUID.randomUUID();
-        assertThrows(IllegalStateException.class, () -> {
-            debate.addParticipant(DebateSide.FOR, randomUserId);
-        });
+        assertThrows(IllegalStateException.class, () -> debate.addParticipant(DebateSide.FOR, randomUserId));
     }
 
     @Test
     void shouldRejectParticipantWhenSideIsAlreadyTaken() {
+        DebateFormat format = new DebateFormat(3, 60);
         Debate debate = new Debate(
                 UUID.randomUUID(),
                 "Training AI on copyrighted data is copyright infringement.",
-                "A debate about copyright and artificial intelligence."
+                "A debate about copyright and artificial intelligence.",
+                format
         );
 
         debate.addParticipant(DebateSide.FOR, UUID.randomUUID());
@@ -92,10 +99,12 @@ public class DebateTest {
     @Test
     void shouldNotAllowSameParticipantTwice() {
         UUID userId = UUID.randomUUID();
+        DebateFormat format = new DebateFormat(3, 60);
         Debate debate = new Debate(
                 UUID.randomUUID(),
                 "Training AI on copyrighted data is copyright infringement.",
-                "A debate about copyright and artificial intelligence."
+                "A debate about copyright and artificial intelligence.",
+                format
         );
 
         debate.addParticipant(DebateSide.FOR, userId);

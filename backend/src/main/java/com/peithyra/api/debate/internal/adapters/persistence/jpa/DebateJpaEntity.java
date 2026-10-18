@@ -2,6 +2,7 @@ package com.peithyra.api.debate.internal.adapters.persistence.jpa;
 
 
 import com.peithyra.api.debate.internal.domain.Debate;
+import com.peithyra.api.debate.internal.domain.DebateFormat;
 import com.peithyra.api.debate.internal.domain.DebateStatus;
 import jakarta.persistence.*;
 import org.hibernate.annotations.BatchSize;
@@ -25,6 +26,8 @@ public class DebateJpaEntity {
     private Instant updatedAt;
     private Instant startedAt;
     private Instant endedAt;
+    private int numberOfTurns;
+    private int turnTimeLimitSeconds;
 
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(
@@ -57,6 +60,8 @@ public class DebateJpaEntity {
         entity.updatedAt = debate.getUpdatedAt();
         entity.startedAt = debate.getStartedAt();
         entity.endedAt = debate.getEndedAt();
+        entity.numberOfTurns = debate.getFormat().numberOfTurns();
+        entity.turnTimeLimitSeconds = debate.getFormat().turnTimeLimitSeconds();
 
         entity.participants = debate.getParticipants().stream()
                 .map(ParticipantJpaEmbeddable::fromDomain)
@@ -75,16 +80,25 @@ public class DebateJpaEntity {
 
     public static Debate toDomain(DebateJpaEntity entity) {
 
-        return new Debate(
+        return new Debate.ReconstructBuilder(
                 entity.id,
                 entity.proposition,
                 entity.description,
-                entity.status,
-                entity.participants.stream().map(ParticipantJpaEmbeddable::toDomain).toList(),
-                entity.createdAt,
-                entity.startedAt,
-                entity.endedAt,
-                entity.updatedAt
-        );
+                entity.createdAt
+        )
+                .withStatus(entity.status)
+                .withParticipants(entity.participants.stream()
+                        .map(ParticipantJpaEmbeddable::toDomain)
+                        .toList())
+                .withStartedAt(entity.startedAt)
+                .withEndedAt(entity.endedAt)
+                .withUpdatedAt(entity.updatedAt)
+                .withFormat(
+                        new DebateFormat(
+                                entity.numberOfTurns,
+                                entity.turnTimeLimitSeconds
+                        )
+                )
+                .build();
     }
 }

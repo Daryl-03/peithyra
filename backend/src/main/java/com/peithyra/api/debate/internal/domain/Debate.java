@@ -7,6 +7,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 public class Debate {
@@ -19,30 +20,42 @@ public class Debate {
     private Instant updatedAt;
     private Instant startedAt;
     private Instant endedAt;
+    private DebateFormat format;
     private final List<Participant> participants;
 
-    public Debate(UUID id, String proposition, String description) {
+    public Debate(UUID id, String proposition, String description, DebateFormat format) {
         this.id = id;
         this.proposition = proposition;
         this.description = description;
+        this.format = format;
         this.createdAt = Instant.now();
         this.updatedAt = Instant.now();
         this.endedAt = null;
         this.status = DebateStatus.WAITING_FOR_OPPONENT;
         this.participants = new ArrayList<>();
     }
-
-    public Debate(UUID id, String proposition, String description, DebateStatus status, List<Participant> participants, Instant createdAt, Instant startedAt, Instant endedAt, Instant updatedAt) {
+    public Debate(UUID id, String proposition, String description, Instant createdAt){
         this.id = id;
         this.proposition = proposition;
         this.description = description;
-        this.status = status;
         this.createdAt = createdAt;
-        this.startedAt = startedAt;
-        this.updatedAt = updatedAt;
-        this.endedAt = endedAt;
-        this.participants = new ArrayList<>(participants);
+        this.updatedAt = Instant.now();
+        this.endedAt = null;
+        this.status = DebateStatus.WAITING_FOR_OPPONENT;
+        this.participants = new ArrayList<>();
     }
+
+//    public Debate(UUID id, String proposition, String description, DebateStatus status, List<Participant> participants, Instant createdAt, Instant startedAt, Instant endedAt, Instant updatedAt) {
+//        this.id = id;
+//        this.proposition = proposition;
+//        this.description = description;
+//        this.status = status;
+//        this.createdAt = createdAt;
+//        this.startedAt = startedAt;
+//        this.updatedAt = updatedAt;
+//        this.endedAt = endedAt;
+//        this.participants = new ArrayList<>(participants);
+//    }
 
     public void addParticipant(DebateSide side, UUID userId) {
         if (status != DebateStatus.WAITING_FOR_OPPONENT) {
@@ -105,5 +118,79 @@ public class Debate {
 
     public Instant getEndedAt() {
         return endedAt;
+    }
+
+    public DebateFormat getFormat() {
+        return format;
+    }
+
+    public static class ReconstructBuilder {
+        private final UUID id;
+        private final String proposition;
+        private final String description;
+        private final Instant createdAt;
+        private DebateStatus status;
+        private List<Participant> participants;
+        private Instant startedAt;
+        private Instant endedAt;
+        private Instant updatedAt;
+        private DebateFormat format;
+
+        public ReconstructBuilder(UUID id, String proposition, String description, Instant createdAt) {
+            this.id = id;
+            this.proposition = proposition;
+            this.description = description;
+            this.createdAt = createdAt;
+        }
+
+        public ReconstructBuilder withStatus(DebateStatus status) {
+            this.status = status;
+            return this;
+        }
+
+        public ReconstructBuilder withParticipants(List<Participant> participants) {
+            this.participants = List.copyOf(participants);
+            return this;
+        }
+
+        public ReconstructBuilder withStartedAt(Instant startedAt) {
+            this.startedAt = startedAt;
+            return this;
+        }
+
+        public ReconstructBuilder withEndedAt(Instant endedAt) {
+            this.endedAt = endedAt;
+            return this;
+        }
+
+        public ReconstructBuilder withUpdatedAt(Instant updatedAt) {
+            this.updatedAt = updatedAt;
+            return this;
+        }
+
+        public ReconstructBuilder withFormat(DebateFormat format) {
+            this.format = format;
+            return this;
+        }
+
+        public Debate build() {
+            Objects.requireNonNull(id, "id is required for reconstruction");
+            Objects.requireNonNull(proposition, "proposition is required for reconstruction");
+            Objects.requireNonNull(createdAt, "createdAt is required for reconstruction");
+            Objects.requireNonNull(status, "status is required for reconstruction");
+            Objects.requireNonNull(participants, "participants is required for reconstruction");
+            Objects.requireNonNull(updatedAt, "updatedAt is required for reconstruction");
+            Objects.requireNonNull(format, "format is required for reconstruction");
+
+            Debate debate = new Debate(id, proposition, description, createdAt);
+            debate.status = this.status;
+            debate.participants.addAll(this.participants);
+            debate.startedAt = this.startedAt;
+            debate.endedAt = this.endedAt;
+            debate.updatedAt = this.updatedAt;
+            debate.format = this.format;
+            return debate;
+        }
+
     }
 }

@@ -20,7 +20,7 @@ public class CreateDebateUseCase {
     }
 
     public CreateDebateResponse execute(CreateDebateCommand command) {
-        Debate debate = new Debate(UUID.randomUUID(), command.proposition(), command.description());
+        Debate debate = new Debate(UUID.randomUUID(), command.proposition(), command.description(), command.format());
 
         debate.addParticipant(
                         command.side(),
@@ -34,7 +34,8 @@ public class CreateDebateUseCase {
                 debate.getProposition(),
                 debate.getDescription(),
                 DebateStatus.WAITING_FOR_OPPONENT,
-                debate.getCreatedAt()
+                debate.getCreatedAt(),
+                debate.getFormat()
         );
     }
 }

@@ -5,6 +5,7 @@ import com.peithyra.api.debate.internal.application.dto.CreateDebateCommand;
 import com.peithyra.api.debate.internal.application.port.in.CreateDebateUseCase;
 import com.peithyra.api.debate.internal.application.port.out.DebateRepository;
 
+import com.peithyra.api.debate.internal.domain.DebateFormat;
 import com.peithyra.api.debate.internal.domain.DebateSide;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,12 +35,14 @@ public class CreateDebateUseCaseTest {
     @Test
     void shouldCreateParticipantWithDebate() {
         UUID creatorId = UUID.randomUUID();
+        DebateFormat format = new DebateFormat(3, 60);
         createDebateUseCase.execute(
                 new CreateDebateCommand(
                         "We should switch to electric cars",
                         "",
                         creatorId,
-                        DebateSide.FOR
+                        DebateSide.FOR,
+                        format
                 )
         );
 
@@ -50,7 +53,8 @@ public class CreateDebateUseCaseTest {
 
         assertAll(
                 () -> assertEquals(1, debate.getParticipants().size()),
-                () -> assertEquals(creatorId, debate.getParticipants().getFirst().userId())
+                () -> assertEquals(creatorId, debate.getParticipants().getFirst().userId()),
+                () -> assertEquals(format, debate.getFormat())
         );
     }
 }

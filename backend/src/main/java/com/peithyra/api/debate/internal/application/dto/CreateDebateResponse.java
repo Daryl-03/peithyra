@@ -1,6 +1,6 @@
 package com.peithyra.api.debate.internal.application.dto;
 
-import com.peithyra.api.debate.internal.domain.DebateSide;
+import com.peithyra.api.debate.internal.domain.DebateFormat;
 import com.peithyra.api.debate.internal.domain.DebateStatus;
 
 import java.time.Instant;
@@ -11,6 +11,7 @@ public record CreateDebateResponse(
         String proposition,
         String description,
         DebateStatus status,
-        Instant createdAt
+        Instant createdAt,
+        DebateFormat format
 ) {
 }

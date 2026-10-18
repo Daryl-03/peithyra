@@ -2,7 +2,9 @@ package com.peithyra.api.debate.internal.adapters.web.dto;
 
 
 import com.peithyra.api.debate.internal.application.dto.CreateDebateCommand;
+import com.peithyra.api.debate.internal.domain.DebateFormat;
 import com.peithyra.api.debate.internal.domain.DebateSide;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -17,9 +19,14 @@ public record CreateDebateRequest(
     @Size(min = 15, max = 200)
     String description,
     @NotNull
-    DebateSide side
+    DebateSide side,
+    @NotNull @Min(1)
+    int numberOfTurns,
+    @NotNull @Min(60)
+    int turnTimeLimitSeconds
 ) {
     public CreateDebateCommand toCommand(UUID creatorId) {
-        return new CreateDebateCommand(proposition, description, creatorId, side);
+        DebateFormat format = new DebateFormat(numberOfTurns, turnTimeLimitSeconds);
+        return new CreateDebateCommand(proposition, description, creatorId, side, format);
     }
 }
