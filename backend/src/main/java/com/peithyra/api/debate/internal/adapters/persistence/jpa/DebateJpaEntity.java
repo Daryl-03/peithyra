@@ -75,16 +75,19 @@ public class DebateJpaEntity {
 
     public static Debate toDomain(DebateJpaEntity entity) {
 
-        return new Debate(
+        return new Debate.ReconstructBuilder(
                 entity.id,
                 entity.proposition,
                 entity.description,
-                entity.status,
-                entity.participants.stream().map(ParticipantJpaEmbeddable::toDomain).toList(),
-                entity.createdAt,
-                entity.startedAt,
-                entity.endedAt,
-                entity.updatedAt
-        );
+                entity.createdAt
+        )
+                .withStatus(entity.status)
+                .withParticipants(entity.participants.stream()
+                        .map(ParticipantJpaEmbeddable::toDomain)
+                        .toList())
+                .withStartedAt(entity.startedAt)
+                .withEndedAt(entity.endedAt)
+                .withUpdatedAt(entity.updatedAt)
+                .build();
     }
 }
