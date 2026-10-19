@@ -44,7 +44,7 @@ export async function requireOnboardedUser() {
     await connection();
 
     const result = await getCurrentProfile();
-	console.error("Current profile result:", result);
+    console.error("Current profile result:", result);
     if (result.status === "unauthorized") redirect("/api/auth/login");
     if (result.status === "missing") redirect("/onboarding");
     if (result.status === "ready") return result.profile;
