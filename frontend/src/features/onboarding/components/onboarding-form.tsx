@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LogoutLink } from "@kinde-oss/kinde-auth-nextjs/components";
+
 import { ArrowRight, LoaderCircle } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { Controller, useForm } from "react-hook-form";
@@ -14,6 +15,7 @@ import {
     FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { applyServerErrors } from "@/lib/forms/apply-server-errors";
 import { createProfile } from "../actions/create-profile";
 import { onboardingFormSchema } from "../model/onboarding-schema";
 
@@ -26,31 +28,11 @@ export function OnboardingForm() {
     const username = form.watch("username");
     const { executeAsync, isPending } = useAction(createProfile, {
         onError: ({ error }) => {
-            if (error.validationErrors) {
-                let shouldFocus = true;
-                for (const name of onboardingFormSchema.keyof().options) {
-                    const message = error.validationErrors[name]?._errors?.[0];
-                    if (message) {
-                        form.setError(
-                            name,
-                            { type: "server", message },
-                            { shouldFocus },
-                        );
-                        shouldFocus = false;
-                    }
-                }
-                const message = error.validationErrors._errors?.[0];
-                if (message)
-                    form.setError("root.server", { type: "server", message });
-                return;
-            }
-
-            form.setError("root.server", {
-                type: "server",
-                message:
-                    error.serverError ??
-                    "Impossible de joindre le serveur. Veuillez réessayer.",
-            });
+            applyServerErrors(
+                form.setError,
+                onboardingFormSchema.keyof().options,
+                error,
+            );
         },
     });
     const pending = form.formState.isSubmitting || isPending;

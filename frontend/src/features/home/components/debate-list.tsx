@@ -1,4 +1,3 @@
-import { DebateCard } from "@/components/home/debate-card";
 import {
     Empty,
     EmptyDescription,
@@ -6,6 +5,7 @@ import {
     EmptyTitle,
 } from "@/components/ui/empty";
 import type { DebateSummary } from "@/features/debates/model/debate-summary";
+import { DebateCard } from "./debate-card";
 
 type DebateListProps = {
     debates: DebateSummary[];

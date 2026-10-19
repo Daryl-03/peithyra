@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
-import { backendFetch } from "@/lib/backend-fetch";
+import { backendFetch } from "@/lib/apis/backend-fetch";
 import { getCurrentProfile, requireOnboardedUser } from "./current-profile";
 
-vi.mock("@/lib/backend-fetch", () => ({ backendFetch: vi.fn() }));
+vi.mock("@/lib/apis/backend-fetch", () => ({ backendFetch: vi.fn() }));
 
 const { redirectMock } = vi.hoisted(() => ({ redirectMock: vi.fn() }));
 vi.mock("next/navigation", () => ({ redirect: redirectMock }));

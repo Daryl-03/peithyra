@@ -3,7 +3,7 @@ import "server-only";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { z } from "zod";
-import { backendFetch } from "@/lib/backend-fetch";
+import { backendFetch } from "@/lib/apis/backend-fetch";
 
 const profileSchema = z.object({
     id: z.uuid(),
@@ -22,6 +22,7 @@ export async function getCurrentProfile(): Promise<ProfileState> {
             { cache: "no-store", signal: AbortSignal.timeout(10000) },
             { redirectOnAuthError: false },
         );
+
         if (response.status === 401) return { status: "unauthorized" };
         if (response.status === 403) {
             const error = await response.json();
@@ -31,8 +32,10 @@ export async function getCurrentProfile(): Promise<ProfileState> {
         if (!response.ok) return { status: "error" };
 
         const profile = profileSchema.parse(await response.json());
+
         return { status: "ready", profile };
-    } catch {
+    } catch (error) {
+        console.error("Error occurred while fetching current profile:", error);
         return { status: "error" };
     }
 }
@@ -41,6 +44,7 @@ export async function requireOnboardedUser() {
     await connection();
 
     const result = await getCurrentProfile();
+    console.error("Current profile result:", result);
     if (result.status === "unauthorized") redirect("/api/auth/login");
     if (result.status === "missing") redirect("/onboarding");
     if (result.status === "ready") return result.profile;

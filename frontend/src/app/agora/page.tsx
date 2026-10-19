@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
-
 import { Suspense } from "react";
-import { LatestDebates } from "@/components/home/latest-debates";
+
+import { NewDebateDialog } from "@/features/agora/components/new-debate-dialog";
+import { LatestDebates } from "@/features/home/components/latest-debates";
 import { requireOnboardedUser } from "@/features/identity/server/current-profile";
 
 export const metadata: Metadata = { title: "Agora | Peithyra" };
@@ -20,10 +21,14 @@ export default async function AgoraPage() {
                 </p>
             </div>
 
-            <section aria-labelledby="debates-title">
-                <h2 id="debates-title" className="mb-5 text-xl font-medium">
-                    Les propositions du moment
-                </h2>
+            <section aria-labelledby="debates-title" className="space-y-3">
+                <div className="flex items-center  justify-between">
+                    <h2 id="debates-title" className="text-xl font-medium">
+                        Les propositions du moment
+                    </h2>
+
+                    <NewDebateDialog />
+                </div>
                 <Suspense
                     fallback={
                         <output className="block py-8 text-muted-foreground">
