@@ -3,10 +3,14 @@ package com.peithyra.api.debate.internal.adapters.persistence.jpa;
 import com.peithyra.api.debate.internal.application.dto.PagedResult;
 import com.peithyra.api.debate.internal.application.port.out.DebateRepository;
 import com.peithyra.api.debate.internal.domain.Debate;
+import com.peithyra.api.debate.internal.domain.DebateStatus;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Set;
+import java.util.UUID;
 
 @Repository
 public class JpaDebateRepository implements DebateRepository {
@@ -33,5 +37,10 @@ public class JpaDebateRepository implements DebateRepository {
                 debates.getTotalElements(),
                 debates.getTotalPages()
         );
+    }
+
+    @Override
+    public boolean existsByCreatorIdAndStatusIn(UUID creatorId, Set<DebateStatus> statuses) {
+        return repository.existsByParticipants_UserIdAndStatusIn(creatorId, statuses);
     }
 }

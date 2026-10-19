@@ -4,11 +4,21 @@ import com.peithyra.api.identity.internal.application.port.out.UserRepository;
 import com.peithyra.api.identity.internal.domain.User;
 
 import java.util.Optional;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class InMemoryUserRepository implements UserRepository {
     private final ConcurrentHashMap<UUID, User> users = new ConcurrentHashMap<>();
+
+    @Override
+    public Map<UUID, String> findUsernamesByIds(Set<UUID> userIds) {
+        return users.values().stream()
+                .filter(user -> userIds.contains(user.getId()))
+                .collect(Collectors.toMap(User::getId, User::getUsername));
+    }
 
 
     @Override

@@ -8,6 +8,10 @@ import org.hibernate.exception.ConstraintViolationException;
 import com.peithyra.api.identity.internal.application.port.out.ProfileConflictException;
 
 import java.util.Optional;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Repository
 public class JpaUserRepository implements UserRepository {
@@ -16,6 +20,13 @@ public class JpaUserRepository implements UserRepository {
 
     public JpaUserRepository(SpringDataUserRepository repository) {
         this.repository = repository;
+    }
+
+    @Override
+    public Map<UUID, String> findUsernamesByIds(Set<UUID> userIds) {
+        return repository.findAllById(userIds).stream()
+                .map(UserJpaEntity::toDomain)
+                .collect(Collectors.toMap(User::getId, User::getUsername));
     }
 
     @Override
