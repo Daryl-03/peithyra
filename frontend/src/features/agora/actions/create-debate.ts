@@ -22,8 +22,9 @@ export const createDebate = authedClient
         });
 
         if (!response.ok) {
-			console.error(`Debate creation failed with status ${response.status}: ${await response.text()}`,
-			);
+            console.error(
+                `Debate creation failed with status ${response.status}: ${await response.text()}`,
+            );
             throw new Error(
                 `Debate creation failed with status ${response.status}`,
             );

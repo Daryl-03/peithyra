@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 
 import { NewDebateDialog } from "@/features/agora/components/new-debate-dialog";
-import { requireOnboardedUser } from "@/features/identity/server/current-profile";
 import { LatestDebates } from "@/features/home/components/latest-debates";
+import { requireOnboardedUser } from "@/features/identity/server/current-profile";
 
 export const metadata: Metadata = { title: "Agora | Peithyra" };
 
