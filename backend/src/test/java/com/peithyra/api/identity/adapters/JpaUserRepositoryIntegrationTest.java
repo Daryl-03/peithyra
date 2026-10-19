@@ -14,6 +14,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.dao.DataIntegrityViolationException;
 import java.time.Instant;
 import java.util.UUID;
+import java.util.Map;
+import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Import(TestcontainersConfiguration.class)
@@ -23,6 +25,29 @@ class JpaUserRepositoryIntegrationTest {
     @Autowired UserRepository repository;
     @Autowired SpringDataUserRepository springRepository;
     @BeforeEach void clean() { springRepository.deleteAll(); }
+
+    @Test void returnsOnlyRequestedUsernamesAndOmitsUnknownIds() {
+        var alice = new User(UUID.randomUUID(), "kinde-1", "Alice");
+        var camille = new User(UUID.randomUUID(), "kinde-2", "Camille");
+        repository.save(alice);
+        repository.save(camille);
+        repository.save(new User(UUID.randomUUID(), "kinde-3", "Thomas"));
+
+        assertEquals(Map.of(alice.getId(), "Alice", camille.getId(), "Camille"),
+                repository.findUsernamesByIds(Set.of(alice.getId(), camille.getId(), UUID.randomUUID())));
+    }
+
+    @Test void returnsEmptyUsernamesWhenNoIdsAreKnown() {
+        repository.save(new User(UUID.randomUUID(), "kinde-1", "Alice"));
+
+        assertTrue(repository.findUsernamesByIds(Set.of(UUID.randomUUID())).isEmpty());
+    }
+
+    @Test void returnsEmptyUsernamesForEmptyIds() {
+        repository.save(new User(UUID.randomUUID(), "kinde-1", "Alice"));
+
+        assertTrue(repository.findUsernamesByIds(Set.of()).isEmpty());
+    }
 
     @Test void savesAndRestoresProfileAndDates() {
         var created = Instant.parse("2026-01-01T12:00:00Z");
