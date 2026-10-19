@@ -7,6 +7,7 @@ import com.peithyra.api.debate.internal.application.port.out.DebateRepository;
 import com.peithyra.api.debate.internal.domain.Debate;
 import com.peithyra.api.debate.internal.domain.DebateFormat;
 import com.peithyra.api.debate.internal.domain.DebateSide;
+import com.peithyra.api.debate.internal.domain.DebateStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,10 +15,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.Set;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Import(TestcontainersConfiguration.class)
 @ActiveProfiles("test")
@@ -67,5 +68,34 @@ public class JpaDebateRepositoryIntegrationTest {
                 ),
                 () -> assertEquals(format, retrievedDebate.getFormat())
         );
+    }
+
+    @Test
+    void shouldReturnTrueIfDebateExistsForCreatorWithGivenStatuses() {
+        UUID debateId = UUID.randomUUID();
+        UUID creatorId = UUID.randomUUID();
+        DebateFormat format = new DebateFormat(3, 60);
+
+        Debate debate = new Debate(
+                debateId,
+                "Moral and law are two separate matters",
+                "A debate about moral and legal principles.",
+                format
+        );
+
+        debate.addParticipant(DebateSide.FOR, creatorId);
+
+        debateRepository.save(debate);
+
+        boolean exists = debateRepository.existsByCreatorIdAndStatusIn(
+                creatorId,
+                Set.of(debate.getStatus())
+        );
+
+        assertTrue(exists);
+        assertFalse(debateRepository.existsByCreatorIdAndStatusIn(
+                UUID.randomUUID(),
+                Set.of(DebateStatus.ONGOING)
+        ));
     }
 }

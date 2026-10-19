@@ -2,6 +2,7 @@ package com.peithyra.api.debate.application;
 
 import com.peithyra.api.debate.internal.application.dto.CreateDebateCommand;
 
+import com.peithyra.api.debate.internal.application.exceptioin.DebateAlreadyOngoingException;
 import com.peithyra.api.debate.internal.application.port.in.CreateDebateUseCase;
 import com.peithyra.api.debate.internal.application.port.out.DebateRepository;
 
@@ -14,10 +15,8 @@ import com.peithyra.api.debate.internal.domain.Debate;
 
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 
 public class CreateDebateUseCaseTest {
@@ -36,6 +35,7 @@ public class CreateDebateUseCaseTest {
     void shouldCreateParticipantWithDebate() {
         UUID creatorId = UUID.randomUUID();
         DebateFormat format = new DebateFormat(3, 60);
+        when(repository.existsByCreatorIdAndStatusIn(eq(creatorId), anySet())).thenReturn(false);
         createDebateUseCase.execute(
                 new CreateDebateCommand(
                         "We should switch to electric cars",
@@ -56,5 +56,24 @@ public class CreateDebateUseCaseTest {
                 () -> assertEquals(creatorId, debate.getParticipants().getFirst().userId()),
                 () -> assertEquals(format, debate.getFormat())
         );
+    }
+
+    @Test
+    void shouldNotCreateDebateIfCreatorHasExistingDebate() {
+        UUID creatorId = UUID.randomUUID();
+        DebateFormat format = new DebateFormat(3, 60);
+        when(repository.existsByCreatorIdAndStatusIn(eq(creatorId), anySet())).thenReturn(true);
+
+        assertThrows(DebateAlreadyOngoingException.class, () -> {
+            createDebateUseCase.execute(
+                    new CreateDebateCommand(
+                            "We should switch to electric cars",
+                            "",
+                            creatorId,
+                            DebateSide.FOR,
+                            format
+                    )
+            );
+        });
     }
 }
