@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import type { InferSafeActionFnResult } from "next-safe-action";
 import { backendFetch } from "@/lib/apis/backend-fetch";
-import { authedClient } from "@/lib/apis/safe-action";
+import { ActionError, authedClient } from "@/lib/apis/safe-action";
 import { createDebateFormSchema } from "../models/create-debate-schema";
 
 export type CreateDebateActionResult = InferSafeActionFnResult<
@@ -23,8 +23,17 @@ export const createDebate = authedClient
 
         if (!response.ok) {
             console.error(
-                `Debate creation failed with status ${response.status}: ${await response.text()}`,
+                `Debate creation failed with status ${response.status}: ${await response.clone().text()}`,
             );
+            if (response.status === 409) {
+                // check code
+                const error = await response.json();
+                if (error.code === "DEBATE_ALREADY_ONGOING") {
+                    throw new ActionError(
+                        "You already have an ongoing debate. Please finish it before starting a new one.",
+                    );
+                }
+            }
             throw new Error(
                 `Debate creation failed with status ${response.status}`,
             );

@@ -5,6 +5,7 @@ import com.peithyra.api.debate.internal.application.dto.CreateDebateCommand;
 import com.peithyra.api.debate.internal.application.dto.CreateDebateResponse;
 import com.peithyra.api.debate.internal.application.dto.ListDebateCommand;
 import com.peithyra.api.debate.internal.application.dto.PagedResult;
+import com.peithyra.api.debate.internal.application.exceptioin.DebateAlreadyOngoingException;
 import com.peithyra.api.debate.internal.application.port.in.CreateDebateUseCase;
 import com.peithyra.api.debate.internal.application.port.in.ListDebatesUseCase;
 import com.peithyra.api.config.security.SecurityConfig;
@@ -175,5 +176,43 @@ public class DebateControllerTest {
                 .andExpect(jsonPath("$.content").isArray());
 
         verify(listDebatesUseCase).execute(expectedCommand);
+    }
+
+    @Test
+    void shouldHandleDebateAlreadyOngoingException() throws Exception {
+        UUID creatorId = UUID.randomUUID();
+        DebateFormat debateFormat = new DebateFormat(3, 60);
+
+        CreateDebateCommand expectedCommand = new CreateDebateCommand(
+                "Moral and law are two separate matters",
+                "This is about the relationship between moral and legal principles.",
+                creatorId,
+                DebateSide.FOR,
+                debateFormat
+        );
+
+        when(getUserUseCase.execute("kinde-user-id"))
+                .thenReturn(Optional.of(new UserView(creatorId, "kinde-user-id", "John Doe")));
+
+        when(createDebateUseCase.execute(expectedCommand))
+                .thenThrow(new DebateAlreadyOngoingException("User already has an ongoing debate."));
+
+        String requestBody = String.format("""
+                {
+                    "proposition": "%s",
+                    "description": "%s",
+                    "side": "FOR",
+                    "numberOfTurns": 3,
+                    "turnTimeLimitSeconds": 60
+                }
+                """, expectedCommand.proposition(), expectedCommand.description());
+
+        mockMvc.perform(post("/api/debates")
+                        .with(jwt().jwt(token -> token.subject("kinde-user-id")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isConflict());
+
+        verify(createDebateUseCase).execute(expectedCommand);
     }
 }
