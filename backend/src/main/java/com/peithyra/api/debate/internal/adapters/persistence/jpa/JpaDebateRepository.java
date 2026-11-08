@@ -46,6 +46,7 @@ public class JpaDebateRepository implements DebateRepository {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<Debate> findById(UUID debateId) {
         return repository.findById(debateId).map(DebateJpaEntity::toDomain);
     }
