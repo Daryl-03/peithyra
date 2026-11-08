@@ -16,7 +16,7 @@ public record CreateDebateRequest(
     @Size(min = 15, max = 200)
     String proposition,
     @NotBlank
-    @Size(min = 15, max = 200)
+    @Size(min = 15, max = 400)
     String description,
     @NotNull
     DebateSide side,

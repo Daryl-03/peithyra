@@ -1,8 +1,9 @@
 package com.peithyra.api.debate.application;
 
+import com.peithyra.api.debate.support.InMemoryDebateRepository;
 import com.peithyra.api.debate.internal.application.dto.CreateDebateCommand;
 
-import com.peithyra.api.debate.internal.application.exceptioin.DebateAlreadyOngoingException;
+import com.peithyra.api.debate.internal.application.exception.DebateAlreadyOngoingException;
 import com.peithyra.api.debate.internal.application.port.in.CreateDebateUseCase;
 import com.peithyra.api.debate.internal.application.port.out.DebateRepository;
 
@@ -10,13 +11,11 @@ import com.peithyra.api.debate.internal.domain.DebateFormat;
 import com.peithyra.api.debate.internal.domain.DebateSide;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import com.peithyra.api.debate.internal.domain.Debate;
 
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 
 public class CreateDebateUseCaseTest {
@@ -27,7 +26,7 @@ public class CreateDebateUseCaseTest {
 
     @BeforeEach
     void setup() {
-        repository = mock(DebateRepository.class);
+        repository = new InMemoryDebateRepository();
         createDebateUseCase = new CreateDebateUseCase(repository);
     }
 
@@ -35,8 +34,7 @@ public class CreateDebateUseCaseTest {
     void shouldCreateParticipantWithDebate() {
         UUID creatorId = UUID.randomUUID();
         DebateFormat format = new DebateFormat(3, 60);
-        when(repository.existsByCreatorIdAndStatusIn(eq(creatorId), anySet())).thenReturn(false);
-        createDebateUseCase.execute(
+        var result = createDebateUseCase.execute(
                 new CreateDebateCommand(
                         "We should switch to electric cars",
                         "",
@@ -46,10 +44,7 @@ public class CreateDebateUseCaseTest {
                 )
         );
 
-        ArgumentCaptor<Debate> captor = ArgumentCaptor.forClass(Debate.class);
-        verify(repository).save(captor.capture());
-
-        Debate debate = captor.getValue();
+        Debate debate = repository.findById(result.id()).orElseThrow();
 
         assertAll(
                 () -> assertEquals(1, debate.getParticipants().size()),
@@ -62,7 +57,14 @@ public class CreateDebateUseCaseTest {
     void shouldNotCreateDebateIfCreatorHasExistingDebate() {
         UUID creatorId = UUID.randomUUID();
         DebateFormat format = new DebateFormat(3, 60);
-        when(repository.existsByCreatorIdAndStatusIn(eq(creatorId), anySet())).thenReturn(true);
+        Debate existingDebate = new Debate(
+                UUID.randomUUID(),
+                "An existing debate",
+                "",
+                format
+        );
+        existingDebate.addParticipant(DebateSide.FOR, creatorId);
+        repository.save(existingDebate);
 
         assertThrows(DebateAlreadyOngoingException.class, () -> {
             createDebateUseCase.execute(

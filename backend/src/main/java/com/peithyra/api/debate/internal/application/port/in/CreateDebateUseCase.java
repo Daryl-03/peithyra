@@ -2,7 +2,7 @@ package com.peithyra.api.debate.internal.application.port.in;
 
 import com.peithyra.api.debate.internal.application.dto.CreateDebateCommand;
 import com.peithyra.api.debate.internal.application.dto.CreateDebateResponse;
-import com.peithyra.api.debate.internal.application.exceptioin.DebateAlreadyOngoingException;
+import com.peithyra.api.debate.internal.application.exception.DebateAlreadyOngoingException;
 import com.peithyra.api.debate.internal.application.port.out.DebateRepository;
 import com.peithyra.api.debate.internal.domain.Debate;
 import com.peithyra.api.debate.internal.domain.DebateStatus;
