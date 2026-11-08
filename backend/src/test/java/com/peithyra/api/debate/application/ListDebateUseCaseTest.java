@@ -1,34 +1,31 @@
 package com.peithyra.api.debate.application;
 
+import com.peithyra.api.debate.support.InMemoryDebateRepository;
+import com.peithyra.api.debate.support.InMemoryUserAdapter;
 import com.peithyra.api.debate.internal.application.dto.DebateSummary;
 import com.peithyra.api.debate.internal.application.dto.ListDebateCommand;
 import com.peithyra.api.debate.internal.application.dto.PagedResult;
 import com.peithyra.api.debate.internal.application.port.in.ListDebatesUseCase;
 import com.peithyra.api.debate.internal.application.port.out.DebateRepository;
-import com.peithyra.api.debate.internal.application.port.out.UserPort;
 import com.peithyra.api.debate.internal.domain.Debate;
 import com.peithyra.api.debate.internal.domain.DebateFormat;
 import com.peithyra.api.debate.internal.domain.DebateSide;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
 
 public class ListDebateUseCaseTest {
 
     private final ListDebatesUseCase listDebatesUseCase;
     private final DebateRepository debateRepository;
-    private final UserPort userPort;
+    private final InMemoryUserAdapter userPort;
 
     public ListDebateUseCaseTest() {
-        debateRepository = mock(DebateRepository.class);
-        userPort = mock(UserPort.class);
+        debateRepository = new InMemoryDebateRepository();
+        userPort = new InMemoryUserAdapter();
         listDebatesUseCase = new ListDebatesUseCase(debateRepository, userPort);
     }
 
@@ -39,7 +36,7 @@ public class ListDebateUseCaseTest {
         DebateFormat format = new DebateFormat(3, 60);
 
         Debate debate = new Debate(
-                UUID.randomUUID(),
+                new UUID(0, 6),
                 "Moral and law are two separate matters",
                 "A debate about moral and legal principles.",
                 format
@@ -48,21 +45,14 @@ public class ListDebateUseCaseTest {
         debate.addParticipant(DebateSide.FOR, firstUserId);
         debate.addParticipant(DebateSide.AGAINST, secondUserId);
 
-        when(debateRepository.findDebatesPage(1, 5))
-                .thenReturn(new PagedResult<>(
-                        List.of(debate),
-                        1,
-                        5,
-                        7,
-                        2
-                ));
-
-        when(userPort.findUsernamesByIds(
-                Set.of(firstUserId, secondUserId)
-        )).thenReturn(Map.of(
-                firstUserId, "alice",
-                secondUserId, "bob"
-        ));
+        for (int id = 1; id <= 7; id++) {
+            if (id != 6) {
+                debateRepository.save(new Debate(new UUID(0, id), "Another proposition " + id, "", format));
+            }
+        }
+        debateRepository.save(debate);
+        userPort.add(firstUserId, "alice");
+        userPort.add(secondUserId, "bob");
 
         PagedResult<DebateSummary> result =
                 listDebatesUseCase.execute(
@@ -76,6 +66,7 @@ public class ListDebateUseCaseTest {
                 () -> assertEquals(5, result.size()),
                 () -> assertEquals(7, result.totalElements()),
                 () -> assertEquals(2, result.totalPages()),
+                () -> assertEquals(2, result.content().size()),
                 () -> assertEquals(debate.getId(), summary.id()),
                 () -> assertEquals(2, summary.participantViewList().size()),
                 () -> assertEquals(
@@ -88,10 +79,6 @@ public class ListDebateUseCaseTest {
                 )
         );
 
-        verify(debateRepository).findDebatesPage(1, 5);
-        verify(userPort).findUsernamesByIds(
-                Set.of(firstUserId, secondUserId)
-        );
     }
 
     @Test
@@ -108,17 +95,7 @@ public class ListDebateUseCaseTest {
 
         debate.addParticipant(DebateSide.FOR, userId);
 
-        when(debateRepository.findDebatesPage(0, 10))
-                .thenReturn(new PagedResult<>(
-                        List.of(debate),
-                        0,
-                        10,
-                        1,
-                        1
-                ));
-
-        when(userPort.findUsernamesByIds(Set.of(userId)))
-                .thenReturn(Map.of());
+        debateRepository.save(debate);
 
         PagedResult<DebateSummary> result =
                 listDebatesUseCase.execute(

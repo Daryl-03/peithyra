@@ -1,14 +1,12 @@
 package com.peithyra.api.debate.adapters;
 
 import com.peithyra.api.debate.internal.adapters.web.DebateController;
-import com.peithyra.api.debate.internal.application.dto.CreateDebateCommand;
-import com.peithyra.api.debate.internal.application.dto.CreateDebateResponse;
-import com.peithyra.api.debate.internal.application.dto.ListDebateCommand;
-import com.peithyra.api.debate.internal.application.dto.PagedResult;
-import com.peithyra.api.debate.internal.application.exceptioin.DebateAlreadyOngoingException;
+import com.peithyra.api.debate.internal.application.dto.*;
+import com.peithyra.api.debate.internal.application.exception.DebateAlreadyOngoingException;
 import com.peithyra.api.debate.internal.application.port.in.CreateDebateUseCase;
 import com.peithyra.api.debate.internal.application.port.in.ListDebatesUseCase;
 import com.peithyra.api.config.security.SecurityConfig;
+import com.peithyra.api.debate.internal.application.port.in.ReadDebateUseCase;
 import com.peithyra.api.debate.internal.domain.DebateFormat;
 import com.peithyra.api.debate.internal.domain.DebateSide;
 import com.peithyra.api.debate.internal.domain.DebateStatus;
@@ -57,6 +55,9 @@ public class DebateControllerTest {
 
     @MockitoBean
     private ListDebatesUseCase listDebatesUseCase;
+
+    @MockitoBean
+    private ReadDebateUseCase readDebateUseCase;
 
     @Test
     void shouldReturnCreatedWhenDebateIsCreated() throws Exception {
@@ -214,5 +215,37 @@ public class DebateControllerTest {
                 .andExpect(status().isConflict());
 
         verify(createDebateUseCase).execute(expectedCommand);
+    }
+
+    @Test
+    void shouldReturnDebateDetailsWhenGetDebateById() throws Exception {
+        UUID debateId = UUID.randomUUID();
+        UUID creatorId = UUID.randomUUID();
+        DebateFormat debateFormat = new DebateFormat(3, 60);
+
+        when(readDebateUseCase.execute(debateId))
+                .thenReturn(new DebateDetails(
+                        debateId,
+                        "Moral and law are two separate matters",
+                        "This is about the relationship between moral and legal principles.",
+                        DebateStatus.WAITING_FOR_OPPONENT,
+                        debateFormat,
+                        Instant.now(),
+                        List.of(new ParticipantSummary(
+                                creatorId,
+                                "John Doe",
+                                DebateSide.FOR
+                        ))
+                ));
+
+        mockMvc.perform(get("/api/debates/{debateId}", debateId)
+                .with(jwt().jwt(token -> token.subject("kinde-user-id"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(debateId.toString()))
+                .andExpect(jsonPath("$.proposition").value("Moral and law are two separate matters"))
+                .andExpect(jsonPath("$.status").value("WAITING_FOR_OPPONENT"))
+                .andExpect(jsonPath("$.format.numberOfTurns").value(3))
+                .andExpect(jsonPath("$.format.turnTimeLimitSeconds").value(60))
+                .andExpect(jsonPath("$.description").value("This is about the relationship between moral and legal principles."));
     }
 }

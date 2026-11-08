@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -42,5 +43,10 @@ public class JpaDebateRepository implements DebateRepository {
     @Override
     public boolean existsByCreatorIdAndStatusIn(UUID creatorId, Set<DebateStatus> statuses) {
         return repository.existsByParticipants_UserIdAndStatusIn(creatorId, statuses);
+    }
+
+    @Override
+    public Optional<Debate> findById(UUID debateId) {
+        return repository.findById(debateId).map(DebateJpaEntity::toDomain);
     }
 }

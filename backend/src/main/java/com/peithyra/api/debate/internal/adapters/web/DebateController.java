@@ -1,12 +1,10 @@
 package com.peithyra.api.debate.internal.adapters.web;
 
 import com.peithyra.api.debate.internal.adapters.web.dto.CreateDebateRequest;
-import com.peithyra.api.debate.internal.application.dto.CreateDebateResponse;
-import com.peithyra.api.debate.internal.application.dto.DebateSummary;
-import com.peithyra.api.debate.internal.application.dto.ListDebateCommand;
-import com.peithyra.api.debate.internal.application.dto.PagedResult;
+import com.peithyra.api.debate.internal.application.dto.*;
 import com.peithyra.api.debate.internal.application.port.in.CreateDebateUseCase;
 import com.peithyra.api.debate.internal.application.port.in.ListDebatesUseCase;
+import com.peithyra.api.debate.internal.application.port.in.ReadDebateUseCase;
 import com.peithyra.api.identity.UserView;
 import com.peithyra.api.identity.web.CurrentUser;
 import jakarta.validation.Valid;
@@ -15,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
 
 
 @RestController
@@ -23,10 +22,12 @@ public class DebateController {
 
     private final CreateDebateUseCase createDebateUseCase;
     private final ListDebatesUseCase listDebatesUseCase;
+    private final ReadDebateUseCase readDebateUseCase;
 
-    public DebateController(CreateDebateUseCase createDebateUseCase, ListDebatesUseCase listDebatesUseCase) {
+    public DebateController(CreateDebateUseCase createDebateUseCase, ListDebatesUseCase listDebatesUseCase, ReadDebateUseCase readDebateUseCase) {
         this.createDebateUseCase = createDebateUseCase;
         this.listDebatesUseCase = listDebatesUseCase;
+        this.readDebateUseCase = readDebateUseCase;
     }
 
     @PostMapping
@@ -43,5 +44,11 @@ public class DebateController {
         PagedResult<DebateSummary> result = listDebatesUseCase.execute(new ListDebateCommand(page, size));
         return ResponseEntity.ok().body(result);
 
+    }
+
+    @GetMapping("/{debateId}")
+    public ResponseEntity<DebateDetails> getDebate(@PathVariable UUID debateId){
+        var debateSummary = readDebateUseCase.execute(debateId);
+        return ResponseEntity.ok().body(debateSummary);
     }
 }
