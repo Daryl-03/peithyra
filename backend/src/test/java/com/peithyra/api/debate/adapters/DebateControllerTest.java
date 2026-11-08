@@ -238,7 +238,8 @@ public class DebateControllerTest {
                         ))
                 ));
 
-        mockMvc.perform(get("/api/debates/{debateId}", debateId))
+        mockMvc.perform(get("/api/debates/{debateId}", debateId)
+                .with(jwt().jwt(token -> token.subject("kinde-user-id"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(debateId.toString()))
                 .andExpect(jsonPath("$.proposition").value("Moral and law are two separate matters"))
