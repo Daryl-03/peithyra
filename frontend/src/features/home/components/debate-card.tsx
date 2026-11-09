@@ -1,48 +1,38 @@
 import { Dot, MoveRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import type { DebateSummary } from "@/features/debates/model/debate-summary";
 
 type DebateCardProps = {
-    title: string;
-    status: "looking" | "ongoing" | "done" | "canceled";
-    forParticipant?: string;
-    againstParticipant?: string;
-    currentRound?: number;
-    totalRounds?: number;
+    debate: DebateSummary;
 };
 
-export function DebateCard({
-    title,
-    status,
-    forParticipant,
-    againstParticipant,
-    currentRound,
-    totalRounds,
-}: DebateCardProps) {
+export function DebateCard({ debate }: DebateCardProps) {
+    const forParticipant = debate.participants.find(
+        (participant) => participant.side === "FOR",
+    )?.username;
+    const againstParticipant = debate.participants.find(
+        (participant) => participant.side === "AGAINST",
+    )?.username;
     return (
         <article className="flex flex-col gap-2 border-b border-b-primary/10 py-4">
             <p className="flex items-center text-muted-foreground uppercase">
-                {status === "ongoing" ? (
+                {debate.status === "ONGOING" ? (
                     <>
                         <Dot color="green" />
                         En cours
-                        {currentRound != null && totalRounds != null && (
-                            <>
-                                {" "}
-                                - Tour {currentRound} / {totalRounds}
-                            </>
-                        )}
                     </>
-                ) : status === "done" ? (
+                ) : debate.status === "DONE" ? (
                     "Terminé"
-                ) : status === "canceled" ? (
+                ) : debate.status === "CANCELED" ? (
                     "Annulé"
                 ) : (
                     "Cherche une opposition"
                 )}
             </p>
             <h3 className="mt-2 mb-4 text-2xl leading-tight font-medium">
-                {title}
+                {debate.proposition}
             </h3>
 
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
@@ -57,10 +47,12 @@ export function DebateCard({
                         <span>{againstParticipant ?? "Place disponible"}</span>
                     </div>
                 </div>
-                <Button variant="secondary" size="lg">
-                    Voir la proposition
-                    <MoveRight />
-                </Button>
+                <Link href={`/debates/${debate.id}`}>
+					<Button variant="secondary" size="lg">
+						Voir la proposition
+						<MoveRight />
+					</Button>
+				</Link>
             </div>
         </article>
     );

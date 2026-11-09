@@ -1,7 +1,10 @@
+import type { DebateStatus } from './../model/debate-summary';
+
+
 export type DebateSummaryDTO = {
     id: string;
     proposition: string;
-    status: "WAITING_FOR_OPPONENT" | "DONE" | "CANCELED" | "ONGOING";
+    status: DebateStatus
     createdAt: string;
     participantViewList: ParticipantSummaryDTO[];
 };

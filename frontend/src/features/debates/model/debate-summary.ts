@@ -1,7 +1,7 @@
 export type DebateSummary = {
     id: string;
     proposition: string;
-    status: "WAITING_FOR_OPPONENT" | "DONE" | "CANCELED" | "ONGOING";
+    status: DebateStatus;
     createdAt: string;
     participants: ParticipantSummary[];
 };
@@ -13,3 +13,5 @@ export type ParticipantSummary = {
 };
 
 export type DebateSide = "FOR" | "AGAINST";
+
+export type DebateStatus = "WAITING_FOR_OPPONENT" | "DONE" | "CANCELED" | "ONGOING";
