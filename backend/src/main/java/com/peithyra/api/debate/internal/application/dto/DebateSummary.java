@@ -1,6 +1,5 @@
 package com.peithyra.api.debate.internal.application.dto;
 
-import com.peithyra.api.debate.internal.domain.DebateFormat;
 import com.peithyra.api.debate.internal.domain.DebateStatus;
 
 import java.time.Instant;
