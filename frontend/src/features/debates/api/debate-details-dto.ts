@@ -1,4 +1,4 @@
-import type { DebateStatus } from './../model/debate-summary'; 
+import type { DebateStatus } from "./../model/debate-summary";
 import type { ParticipantSummaryDTO } from "./debate-summary-dto";
 
 export type DebateDetailsDTO = {

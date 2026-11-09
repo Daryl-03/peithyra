@@ -1,10 +1,9 @@
-import type { DebateStatus } from './../model/debate-summary';
-
+import type { DebateStatus } from "./../model/debate-summary";
 
 export type DebateSummaryDTO = {
     id: string;
     proposition: string;
-    status: DebateStatus
+    status: DebateStatus;
     createdAt: string;
     participantViewList: ParticipantSummaryDTO[];
 };

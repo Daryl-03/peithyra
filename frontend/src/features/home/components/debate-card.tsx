@@ -1,7 +1,7 @@
 import { Dot, MoveRight } from "lucide-react";
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import type { DebateSummary } from "@/features/debates/model/debate-summary";
 
 type DebateCardProps = {
@@ -48,11 +48,11 @@ export function DebateCard({ debate }: DebateCardProps) {
                     </div>
                 </div>
                 <Link href={`/debates/${debate.id}`}>
-					<Button variant="secondary" size="lg">
-						Voir la proposition
-						<MoveRight />
-					</Button>
-				</Link>
+                    <Button variant="secondary" size="lg">
+                        Voir la proposition
+                        <MoveRight />
+                    </Button>
+                </Link>
             </div>
         </article>
     );

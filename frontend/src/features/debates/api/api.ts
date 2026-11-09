@@ -7,10 +7,8 @@ export async function getLatestDebates(
     limit: number,
 ): Promise<DebateSummary[]> {
     try {
-        const response = await backendFetch(
-            `/api/debates?size=${limit}`,
-        );
-		
+        const response = await backendFetch(`/api/debates?size=${limit}`);
+
         if (!response.ok) {
             throw new Error(
                 `Failed to fetch latest debates: ${response.statusText}`,
@@ -34,24 +32,20 @@ export async function getLatestDebates(
 }
 
 export async function getDebateById(
-	debateId: string,
+    debateId: string,
 ): Promise<DebateDetailsDTO> {
-	try {
-		const response = await backendFetch(
-			`/api/debates/${debateId}`,
-		);
-		
-		if (!response.ok) {
-			
-			throw new Error(
-				`Failed to fetch debate with ID ${debateId}: ${response.statusText}`,
-			);
-		}
-		const data = await response.json();
-		return data as DebateDetailsDTO;
+    try {
+        const response = await backendFetch(`/api/debates/${debateId}`);
 
-	} catch (error) {
-		console.error(`Error fetching debate with ID ${debateId}:`, error);
-		throw error;
-	}
+        if (!response.ok) {
+            throw new Error(
+                `Failed to fetch debate with ID ${debateId}: ${response.statusText}`,
+            );
+        }
+        const data = await response.json();
+        return data as DebateDetailsDTO;
+    } catch (error) {
+        console.error(`Error fetching debate with ID ${debateId}:`, error);
+        throw error;
+    }
 }

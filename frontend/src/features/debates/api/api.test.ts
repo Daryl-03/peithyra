@@ -96,7 +96,9 @@ describe("getDebateById", () => {
         fetchMock.mockResolvedValue(Response.json(debate));
 
         await expect(getDebateById(debateId)).resolves.toEqual(debate);
-        expect(fetchMock).toHaveBeenCalledExactlyOnceWith(`/api/debates/${debateId}`);
+        expect(fetchMock).toHaveBeenCalledExactlyOnceWith(
+            `/api/debates/${debateId}`,
+        );
     });
 
     test.each([
@@ -121,8 +123,12 @@ describe("getDebateById", () => {
 
     test("should reject when the response is not valid JSON", async () => {
         vi.spyOn(console, "error").mockImplementation(() => {});
-        fetchMock.mockResolvedValue(new Response("invalid JSON", { status: 200 }));
+        fetchMock.mockResolvedValue(
+            new Response("invalid JSON", { status: 200 }),
+        );
 
-        await expect(getDebateById(debateId)).rejects.toBeInstanceOf(SyntaxError);
+        await expect(getDebateById(debateId)).rejects.toBeInstanceOf(
+            SyntaxError,
+        );
     });
 });

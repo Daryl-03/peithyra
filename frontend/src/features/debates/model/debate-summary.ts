@@ -14,4 +14,8 @@ export type ParticipantSummary = {
 
 export type DebateSide = "FOR" | "AGAINST";
 
-export type DebateStatus = "WAITING_FOR_OPPONENT" | "DONE" | "CANCELED" | "ONGOING";
+export type DebateStatus =
+    | "WAITING_FOR_OPPONENT"
+    | "DONE"
+    | "CANCELED"
+    | "ONGOING";

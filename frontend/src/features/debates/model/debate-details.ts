@@ -4,7 +4,7 @@ export type DebateDetails = {
     id: string;
     proposition: string;
     description: string;
-    status: DebateStatus
+    status: DebateStatus;
     format: DebateFormat;
     createdAt: string;
     participants: ParticipantSummary[];
