@@ -12,13 +12,6 @@ type DebateListProps = {
     emptyTitle?: string;
 };
 
-const cardStatus = {
-    WAITING_FOR_OPPONENT: "looking",
-    ONGOING: "ongoing",
-    DONE: "done",
-    CANCELED: "canceled",
-} as const;
-
 export function DebateList({
     debates,
     emptyTitle = "Aucune proposition disponible",
@@ -39,21 +32,7 @@ export function DebateList({
     return (
         <div className="flex flex-col gap-4">
             {debates.map((debate) => (
-                <DebateCard
-                    key={debate.id}
-                    title={debate.proposition}
-                    status={cardStatus[debate.status]}
-                    forParticipant={
-                        debate.participants.find(
-                            (participant) => participant.side === "FOR",
-                        )?.username
-                    }
-                    againstParticipant={
-                        debate.participants.find(
-                            (participant) => participant.side === "AGAINST",
-                        )?.username
-                    }
-                />
+                <DebateCard key={debate.id} debate={debate} />
             ))}
         </div>
     );

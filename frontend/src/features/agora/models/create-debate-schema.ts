@@ -10,8 +10,8 @@ export const createDebateFormSchema = z.object({
     description: z
         .string()
         .trim()
-        .min(10, "La description doit contenir au moins 10 caractères.")
-        .max(200, "La description doit contenir au maximum 200 caractères."),
+        .min(50, "La description doit contenir au moins 50 caractères.")
+        .max(400, "La description doit contenir au maximum 400 caractères."),
     side: z.enum(DebateSide, "Vous devez choisir un camp."),
     numberOfTurns: z
         .number()

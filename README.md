@@ -1,117 +1,83 @@
 # Peithyra
 
-Peithyra is a live debate platform designed to make online discussions more structured, readable, and engaging.
-
-Two participants debate a topic through controlled speaking turns while an audience follows the exchange. The first version will focus on text-based debates.
+Peithyra is a live debate platform with structured speaking turns. The first version focuses on text-based debates.
 
 ## Project structure
 
-```text
-peithyra/
-├── backend/       # Spring Boot API
-├── frontend/      # Next.js web application
-├── .github/       # GitHub Actions workflows
-└── README.md
-```
-
-## Tech stack
-
-### Backend
-
-- Java 25
-- Spring Boot 4.1
-- Gradle with Kotlin DSL
-- PostgreSQL
-- Flyway
-- Testcontainers
-
-### Frontend
-
-- Next.js
-- TypeScript
-- App Router
-- Tailwind CSS
-- Biome
-- pnpm
-
-### Tooling
-
-- GitHub Actions
-- SonarQube Cloud
-- Docker Compose
+- [Backend](backend/README.md): Java 25, Spring Boot, PostgreSQL, Flyway and Gradle commands.
+- [Frontend](frontend/README.md): Next.js, TypeScript, pnpm and Biome commands.
+- `compose.yaml`: PostgreSQL, API and frontend containers.
+- `compose-local.yaml`: additional localhost ports for PostgreSQL and the API.
 
 ## Requirements
 
-- JDK 25
-- Node.js 24
-- pnpm
-- Docker
-- Git
+- Docker with Docker Compose v2.
+- For development outside containers: JDK 25, Node.js 24 and pnpm 11.18.0.
 
-## Run the backend
+## Docker configuration
+
+Run the following commands from the repository root. Compose reads the root `.env` file. Configure these variables with your local Kinde application values:
+
+```dotenv
+POSTGRES_DB=peithyra
+POSTGRES_USER=peithyra
+POSTGRES_PASSWORD=peithyra
+KINDE_ISSUER_URI=https://your-tenant.kinde.com
+KINDE_JWK_SET_URI=https://your-tenant.kinde.com/.well-known/jwks.json
+BACKEND_URL=http://backend:8080
+KINDE_ISSUER_URL=https://your-tenant.kinde.com
+KINDE_CLIENT_ID=your-client-id
+KINDE_CLIENT_SECRET=your-client-secret
+KINDE_SITE_URL=http://localhost:3000
+KINDE_POST_LOGIN_REDIRECT_URL=http://localhost:3000/api/auth/complete
+KINDE_POST_LOGOUT_REDIRECT_URL=http://localhost:3000
+```
+
+Register the matching callback and redirect URLs in Kinde. Keep real secrets out of Git. The PostgreSQL defaults above are for local development.
+
+## Local development with Docker
+
+Start PostgreSQL and the API, then run the frontend locally using its [README](frontend/README.md):
 
 ```bash
-cd backend
+docker compose -f compose.yaml -f compose-local.yaml up -d --build backend
 ```
 
-On Windows:
+The API is available at `http://localhost:8080`; PostgreSQL is available at `localhost:5432`. Starting `backend` also starts its PostgreSQL dependency.
 
-```powershell
-.\gradlew.bat bootRun
-```
-
-On Linux or macOS:
+To run both applications outside Docker, start only PostgreSQL and follow the two application READMEs:
 
 ```bash
-./gradlew bootRun
+docker compose -f compose.yaml -f compose-local.yaml up -d postgres
 ```
 
-The backend runs by default at:
-
-```text
-http://localhost:8080
-```
-
-## Run the frontend
+## Docker operations
 
 ```bash
-cd frontend
-pnpm install
-pnpm dev
+# Start or rebuild all three services
+docker compose -f compose.yaml -f compose-local.yaml up -d --build
+
+# Inspect service status
+docker compose -f compose.yaml -f compose-local.yaml ps
+
+# Follow API logs (Ctrl+C stops following, not the container)
+docker compose -f compose.yaml -f compose-local.yaml logs -f backend
+
+# Follow frontend logs
+docker compose -f compose.yaml -f compose-local.yaml logs -f frontend
+
+# Rebuild the API after code changes
+docker compose -f compose.yaml -f compose-local.yaml up -d --build backend
+
+# Stop services without removing containers
+docker compose -f compose.yaml -f compose-local.yaml stop
+
+# Remove containers and the network; retain PostgreSQL data
+docker compose -f compose.yaml -f compose-local.yaml down
 ```
 
-The frontend runs by default at:
+The current local override publishes only ports 8080 and 5432. The containerized frontend listens on port 3000 inside Docker but is not published to the host. Use `pnpm dev` for the browser-accessible local frontend, or configure port publishing/reverse proxy access separately.
 
-```text
-http://localhost:3000
-```
+`compose.yaml` alone publishes no host ports. PostgreSQL data is stored in the named volume `peithyra-postgres-data`. Adding `--volumes` to `down` deletes that database data.
 
-## Run the checks
-
-### Backend
-
-```bash
-cd backend
-./gradlew build
-```
-
-On Windows:
-
-```powershell
-cd backend
-.\gradlew.bat build
-```
-
-### Frontend
-
-```bash
-cd frontend
-pnpm lint
-pnpm build
-```
-
-## Project status
-
-Peithyra is currently in its initial development phase.
-
-The current focus is establishing the technical foundation before implementing the first debate features.
+The Docker image builds do not run the test suites. See the application READMEs for validation commands.

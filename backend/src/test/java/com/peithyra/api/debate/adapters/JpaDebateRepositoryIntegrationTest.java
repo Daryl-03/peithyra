@@ -98,4 +98,36 @@ public class JpaDebateRepositoryIntegrationTest {
                 Set.of(DebateStatus.ONGOING)
         ));
     }
+
+    @Test
+    void shouldReturnDebateById() {
+        UUID debateId = UUID.randomUUID();
+        UUID creatorId = UUID.randomUUID();
+        DebateFormat format = new DebateFormat(3, 60);
+
+        Debate debate = new Debate(
+                debateId,
+                "Moral and law are two separate matters",
+                "A debate about moral and legal principles.",
+                format
+        );
+
+        debate.addParticipant(DebateSide.FOR, creatorId);
+
+        debateRepository.save(debate);
+
+        var retrievedDebateOpt = debateRepository.findById(debateId);
+        assertTrue(retrievedDebateOpt.isPresent());
+        var retrievedDebate = retrievedDebateOpt.get();
+        assertAll(
+                () -> assertEquals(debateId, retrievedDebate.getId()),
+                () -> assertEquals(
+                        creatorId,
+                        retrievedDebate.getParticipants()
+                                .getFirst()
+                                .userId()
+                ),
+                () -> assertEquals(format, retrievedDebate.getFormat())
+        );
+    }
 }

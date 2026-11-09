@@ -1,12 +1,10 @@
 package com.peithyra.api.debate.application;
 
-import com.peithyra.api.debate.internal.adapters.StubUserPortAdapter;
 import com.peithyra.api.debate.internal.application.dto.DebateDetails;
 import com.peithyra.api.debate.internal.application.exception.DebateNotFoundException;
 import com.peithyra.api.debate.support.InMemoryDebateRepository;
 import com.peithyra.api.debate.internal.application.port.in.ReadDebateUseCase;
 import com.peithyra.api.debate.internal.application.port.out.DebateRepository;
-import com.peithyra.api.debate.internal.application.port.out.UserPort;
 import com.peithyra.api.debate.internal.domain.Debate;
 import com.peithyra.api.debate.internal.domain.DebateFormat;
 import com.peithyra.api.debate.internal.domain.DebateSide;
