@@ -45,18 +45,6 @@ public class Debate {
         this.participants = new ArrayList<>();
     }
 
-//    public Debate(UUID id, String proposition, String description, DebateStatus status, List<Participant> participants, Instant createdAt, Instant startedAt, Instant endedAt, Instant updatedAt) {
-//        this.id = id;
-//        this.proposition = proposition;
-//        this.description = description;
-//        this.status = status;
-//        this.createdAt = createdAt;
-//        this.startedAt = startedAt;
-//        this.updatedAt = updatedAt;
-//        this.endedAt = endedAt;
-//        this.participants = new ArrayList<>(participants);
-//    }
-
     public void addParticipant(DebateSide side, UUID userId) {
         if (status != DebateStatus.WAITING_FOR_OPPONENT) {
             throw new IllegalStateException("Cannot add participant to a debate that is not waiting for an opponent.");
