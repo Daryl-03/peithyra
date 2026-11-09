@@ -1,6 +1,5 @@
 package com.peithyra.api.debate.application;
 
-
 import com.peithyra.api.debate.internal.application.dto.DebateDetails;
 import com.peithyra.api.debate.internal.application.exception.DebateNotFoundException;
 import com.peithyra.api.debate.support.InMemoryDebateRepository;
