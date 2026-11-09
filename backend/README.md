@@ -1,96 +1,77 @@
 # Peithyra API
 
-Backend API for **Peithyra**, a live debate platform.
-
-## Tech stack
-
-- Java 25
-- Spring Boot 4.1
-- Gradle with Kotlin DSL
-- PostgreSQL
-- Flyway
-- Testcontainers
+Spring Boot API using Java 25, PostgreSQL, Flyway and Gradle with Kotlin DSL.
 
 ## Requirements
 
-- JDK 25
-- Docker
-- Git
+- JDK 25.
+- Docker for PostgreSQL and Testcontainers integration tests.
 
-The project uses the Gradle Wrapper, so Gradle does not need to be installed globally.
+Gradle is provided by the wrapper. Run the commands below from `backend/`.
 
-## Run the application
+## Database and environment
 
-Start the local database:
+Start only PostgreSQL when running the API with Gradle:
 
 ```bash
-docker compose up -d
+docker compose -f ../compose.yaml -f ../compose-local.yaml up -d postgres
 ```
 
-Start the backend:
+Set these environment variables in your terminal or IDE run configuration:
 
-### Windows
+```dotenv
+SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/peithyra
+SPRING_DATASOURCE_USERNAME=peithyra
+SPRING_DATASOURCE_PASSWORD=peithyra
+KINDE_ISSUER_URI=https://your-tenant.kinde.com
+KINDE_JWK_SET_URI=https://your-tenant.kinde.com/.well-known/jwks.json
+```
+
+Match the database credentials to the root Compose `.env` and use your Kinde tenant. Spring Boot does not automatically load that `.env` when launched with Gradle.
+
+For example, in PowerShell:
 
 ```powershell
-.\gradlew.bat bootRun
+$env:SPRING_DATASOURCE_URL = "jdbc:postgresql://localhost:5432/peithyra"
+$env:SPRING_DATASOURCE_USERNAME = "peithyra"
+$env:SPRING_DATASOURCE_PASSWORD = "peithyra"
+$env:KINDE_ISSUER_URI = "https://your-tenant.kinde.com"
+$env:KINDE_JWK_SET_URI = "https://your-tenant.kinde.com/.well-known/jwks.json"
 ```
 
-### Linux and macOS
+On Linux/macOS, set each variable with `export NAME=value` instead. Flyway applies migrations from `src/main/resources/db/migration` at startup.
+
+## Gradle commands
+
+| Action | Windows PowerShell | Linux/macOS |
+| --- | --- | --- |
+| Start the API | `.\gradlew.bat bootRun` | `./gradlew bootRun` |
+| Run all tests | `.\gradlew.bat test` | `./gradlew test` |
+| Run debate application tests | `.\gradlew.bat test --tests "com.peithyra.api.debate.application.*"` | `./gradlew test --tests "com.peithyra.api.debate.application.*"` |
+| Run the JPA integration tests | `.\gradlew.bat test --tests "com.peithyra.api.debate.adapters.JpaDebateRepositoryIntegrationTest"` | `./gradlew test --tests "com.peithyra.api.debate.adapters.JpaDebateRepositoryIntegrationTest"` |
+| Clean, build and test | `.\gradlew.bat clean build` | `./gradlew clean build` |
+| Build the executable JAR | `.\gradlew.bat bootJar` | `./gradlew bootJar` |
+| Generate coverage | `.\gradlew.bat jacocoTestReport` | `./gradlew jacocoTestReport` |
+
+Testcontainers requires a running Docker engine and creates its own test database; it does not need the Compose database. `bootJar` packages the application without running tests.
+
+Reports:
+
+- Tests: `build/reports/tests/test/index.html`.
+- Coverage: `build/reports/jacoco/test/html/index.html`.
+- JARs: `build/libs/`.
+
+The API listens on [http://localhost:8080](http://localhost:8080). Health endpoint: [http://localhost:8080/actuator/health](http://localhost:8080/actuator/health).
+
+## Run the API in Docker
+
+Instead of `bootRun`, use:
 
 ```bash
-./gradlew bootRun
+docker compose -f ../compose.yaml -f ../compose-local.yaml up -d --build backend
+docker compose -f ../compose.yaml -f ../compose-local.yaml logs -f backend
 ```
 
-The API runs by default at:
+This also starts PostgreSQL and injects the environment from the root Compose configuration. Do not run the Docker API and `bootRun` on port 8080 at the same time.
 
-```text
-http://localhost:8080
-```
-
-## Run the tests
-
-### Windows
-
-```powershell
-.\gradlew.bat test
-```
-
-### Linux and macOS
-
-```bash
-./gradlew test
-```
-
-## Build the project
-
-### Windows
-
-```powershell
-.\gradlew.bat clean build
-```
-
-### Linux and macOS
-
-```bash
-./gradlew clean build
-```
-
-## Health check
-
-```text
-GET http://localhost:8080/actuator/health
-```
-
-## Project structure
-
-```text
-src/
-├── main/
-│   ├── java/com/peithyra/api/
-│   └── resources/
-└── test/
-```
-
-## Status
-
-Initial project setup.
+See the [root README](../README.md) for the Compose environment, service status and shutdown commands.
