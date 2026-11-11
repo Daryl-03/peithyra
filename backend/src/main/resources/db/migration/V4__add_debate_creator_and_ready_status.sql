@@ -12,7 +12,7 @@ ALTER table debates
                    'DONE',
                    'CANCELED',
                    'ONGOING',
-                   'READY'
+                   'WAITING_FOR_READY'
             )
         );
 
@@ -20,3 +20,6 @@ ALTER TABLE debate_participants
     ADD CONSTRAINT fk_debate_participants_user
         FOREIGN KEY (user_id)
             REFERENCES users (id);
+
+ALTER TABLE debate_participants
+    ADD column is_ready boolean not null default false;

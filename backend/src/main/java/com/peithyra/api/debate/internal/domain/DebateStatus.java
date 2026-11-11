@@ -5,5 +5,5 @@ public enum DebateStatus {
     DONE,
     CANCELED,
     ONGOING,
-    READY
+    WAITING_FOR_READY
 }
