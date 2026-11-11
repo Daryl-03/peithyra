@@ -22,7 +22,8 @@ public class DebateTest {
                 UUID.randomUUID(),
                 "random prop",
                 "",
-                format
+                format,
+                UUID.randomUUID()
         );
 
         assertAll(
@@ -40,7 +41,8 @@ public class DebateTest {
                 UUID.randomUUID(),
                 "Naruto is the best manga",
                 "",
-                format
+                format,
+                UUID.randomUUID()
         );
 
         debate.addParticipant(DebateSide.FOR, UUID.randomUUID());
@@ -60,7 +62,8 @@ public class DebateTest {
                 UUID.randomUUID(),
                 "Training AI on copyrighted data is copyright infringement.",
                 "",
-                format
+                format,
+                UUID.randomUUID()
         );
 
         debate.addParticipant(DebateSide.FOR, UUID.randomUUID());
@@ -77,7 +80,8 @@ public class DebateTest {
                 UUID.randomUUID(),
                 "Training AI on copyrighted data is copyright infringement.",
                 "A debate about copyright and artificial intelligence.",
-                format
+                format,
+                UUID.randomUUID()
         );
 
         debate.addParticipant(DebateSide.FOR, UUID.randomUUID());
@@ -104,7 +108,8 @@ public class DebateTest {
                 UUID.randomUUID(),
                 "Training AI on copyrighted data is copyright infringement.",
                 "A debate about copyright and artificial intelligence.",
-                format
+                format,
+                UUID.randomUUID()
         );
 
         debate.addParticipant(DebateSide.FOR, userId);

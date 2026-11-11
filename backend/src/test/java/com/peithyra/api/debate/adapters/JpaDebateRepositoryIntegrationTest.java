@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Set;
@@ -31,6 +32,9 @@ public class JpaDebateRepositoryIntegrationTest {
     @Autowired
     private SpringDataDebateRepository springDataDebateRepository;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     @BeforeEach
     public void clearDatabase() {
         springDataDebateRepository.deleteAll();
@@ -46,10 +50,23 @@ public class JpaDebateRepositoryIntegrationTest {
                 debateId,
                 "Moral and law are two separate matters",
                 "A debate about moral and legal principles.",
-                format
+                format,
+                creatorId
         );
 
         debate.addParticipant(DebateSide.FOR, creatorId);
+
+        // create user in database for the participant
+        jdbcTemplate.update("""
+                        INSERT INTO users (
+                            id, username, external_id, created_at, updated_at
+                        )
+                        VALUES (?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                        """,
+                creatorId,
+                "user-" + creatorId.toString().substring(0, 8),
+                "test-" + creatorId
+        );
 
         debateRepository.save(debate);
 
@@ -80,10 +97,23 @@ public class JpaDebateRepositoryIntegrationTest {
                 debateId,
                 "Moral and law are two separate matters",
                 "A debate about moral and legal principles.",
-                format
+                format,
+                creatorId
         );
 
         debate.addParticipant(DebateSide.FOR, creatorId);
+
+        // create user in database for the participant
+        jdbcTemplate.update("""
+                        INSERT INTO users (
+                            id, username, external_id, created_at, updated_at
+                        )
+                        VALUES (?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                        """,
+                creatorId,
+                "user-" + creatorId.toString().substring(0, 8),
+                "test-" + creatorId
+        );
 
         debateRepository.save(debate);
 
@@ -109,10 +139,23 @@ public class JpaDebateRepositoryIntegrationTest {
                 debateId,
                 "Moral and law are two separate matters",
                 "A debate about moral and legal principles.",
-                format
+                format,
+                creatorId
         );
 
         debate.addParticipant(DebateSide.FOR, creatorId);
+
+        // create user in database for the participant
+        jdbcTemplate.update("""
+                        INSERT INTO users (
+                            id, username, external_id, created_at, updated_at
+                        )
+                        VALUES (?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                        """,
+                creatorId,
+                "user-" + creatorId.toString().substring(0, 8),
+                "test-" + creatorId
+        );
 
         debateRepository.save(debate);
 

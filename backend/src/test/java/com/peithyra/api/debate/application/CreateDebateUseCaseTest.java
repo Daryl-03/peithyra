@@ -61,7 +61,8 @@ public class CreateDebateUseCaseTest {
                 UUID.randomUUID(),
                 "An existing debate",
                 "",
-                format
+                format,
+                creatorId
         );
         existingDebate.addParticipant(DebateSide.FOR, creatorId);
         repository.save(existingDebate);

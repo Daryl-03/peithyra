@@ -22,6 +22,7 @@ public class DebateJpaEntity {
     private String description;
     @Enumerated(EnumType.STRING)
     private DebateStatus status;
+    private UUID creatorId;
     private Instant createdAt;
     private Instant updatedAt;
     private Instant startedAt;
@@ -56,6 +57,7 @@ public class DebateJpaEntity {
         entity.proposition = debate.getProposition();
         entity.description = debate.getDescription();
         entity.status = debate.getStatus();
+        entity.creatorId = debate.getCreatorId();
         entity.createdAt = debate.getCreatedAt();
         entity.updatedAt = debate.getUpdatedAt();
         entity.startedAt = debate.getStartedAt();
@@ -84,7 +86,8 @@ public class DebateJpaEntity {
                 entity.id,
                 entity.proposition,
                 entity.description,
-                entity.createdAt
+                entity.createdAt,
+                entity.creatorId
         )
                 .withStatus(entity.status)
                 .withParticipants(entity.participants.stream()

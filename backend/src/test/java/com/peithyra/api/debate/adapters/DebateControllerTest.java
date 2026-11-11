@@ -230,6 +230,7 @@ public class DebateControllerTest {
                         "This is about the relationship between moral and legal principles.",
                         DebateStatus.WAITING_FOR_OPPONENT,
                         debateFormat,
+                        creatorId,
                         Instant.now(),
                         List.of(new ParticipantSummary(
                                 creatorId,

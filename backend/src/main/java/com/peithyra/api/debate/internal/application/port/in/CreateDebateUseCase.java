@@ -27,7 +27,7 @@ public class CreateDebateUseCase {
             throw new DebateAlreadyOngoingException("User already has a debate in progress");
         }
 
-        Debate debate = new Debate(UUID.randomUUID(), command.proposition(), command.description(), command.format());
+        Debate debate = new Debate(UUID.randomUUID(), command.proposition(), command.description(), command.format(), command.creatorId());
 
         debate.addParticipant(
                         command.side(),

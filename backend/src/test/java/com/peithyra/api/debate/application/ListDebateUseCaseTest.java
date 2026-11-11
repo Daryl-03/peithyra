@@ -39,7 +39,8 @@ public class ListDebateUseCaseTest {
                 new UUID(0, 6),
                 "Moral and law are two separate matters",
                 "A debate about moral and legal principles.",
-                format
+                format,
+                firstUserId
         );
 
         debate.addParticipant(DebateSide.FOR, firstUserId);
@@ -47,7 +48,7 @@ public class ListDebateUseCaseTest {
 
         for (int id = 1; id <= 7; id++) {
             if (id != 6) {
-                debateRepository.save(new Debate(new UUID(0, id), "Another proposition " + id, "", format));
+                debateRepository.save(new Debate(new UUID(0, id), "Another proposition " + id, "", format, firstUserId));
             }
         }
         debateRepository.save(debate);
@@ -90,7 +91,8 @@ public class ListDebateUseCaseTest {
                 UUID.randomUUID(),
                 "Moral and law are two separate matters",
                 "A debate about moral and legal principles.",
-                format
+                format,
+                userId
         );
 
         debate.addParticipant(DebateSide.FOR, userId);

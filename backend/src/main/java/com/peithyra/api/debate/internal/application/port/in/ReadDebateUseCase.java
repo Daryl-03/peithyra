@@ -37,6 +37,7 @@ public class ReadDebateUseCase {
                 debate.getDescription(),
                 debate.getStatus(),
                 debate.getFormat(),
+                debate.getCreatorId(),
                 debate.getCreatedAt(),
                 debate.getParticipants().stream()
                         .map(participant -> new ParticipantSummary(

@@ -16,6 +16,7 @@ public class Debate {
     private final String proposition;
     private final String description;
     private DebateStatus status;
+    private final UUID creatorId;
     private final Instant createdAt;
     private Instant updatedAt;
     private Instant startedAt;
@@ -23,18 +24,20 @@ public class Debate {
     private DebateFormat format;
     private final List<Participant> participants;
 
-    public Debate(UUID id, String proposition, String description, DebateFormat format) {
+    public Debate(UUID id, String proposition, String description, DebateFormat format, UUID creatorId) {
         this.id = id;
         this.proposition = proposition;
         this.description = description;
         this.format = format;
+        this.creatorId = creatorId;
         this.createdAt = Instant.now();
         this.updatedAt = Instant.now();
         this.endedAt = null;
         this.status = DebateStatus.WAITING_FOR_OPPONENT;
         this.participants = new ArrayList<>();
     }
-    public Debate(UUID id, String proposition, String description, Instant createdAt){
+
+    private Debate(UUID id, String proposition, String description, Instant createdAt, UUID creatorId) {
         this.id = id;
         this.proposition = proposition;
         this.description = description;
@@ -43,6 +46,7 @@ public class Debate {
         this.endedAt = null;
         this.status = DebateStatus.WAITING_FOR_OPPONENT;
         this.participants = new ArrayList<>();
+        this.creatorId = creatorId;
     }
 
     public void addParticipant(DebateSide side, UUID userId) {
@@ -112,11 +116,16 @@ public class Debate {
         return format;
     }
 
+    public UUID getCreatorId() {
+        return creatorId;
+    }
+
     public static class ReconstructBuilder {
         private final UUID id;
         private final String proposition;
         private final String description;
         private final Instant createdAt;
+        private final UUID creatorId;
         private DebateStatus status;
         private List<Participant> participants;
         private Instant startedAt;
@@ -124,11 +133,12 @@ public class Debate {
         private Instant updatedAt;
         private DebateFormat format;
 
-        public ReconstructBuilder(UUID id, String proposition, String description, Instant createdAt) {
+        public ReconstructBuilder(UUID id, String proposition, String description, Instant createdAt, UUID creatorId) {
             this.id = id;
             this.proposition = proposition;
             this.description = description;
             this.createdAt = createdAt;
+            this.creatorId = creatorId;
         }
 
         public ReconstructBuilder withStatus(DebateStatus status) {
@@ -170,7 +180,7 @@ public class Debate {
             Objects.requireNonNull(updatedAt, "updatedAt is required for reconstruction");
             Objects.requireNonNull(format, "format is required for reconstruction");
 
-            Debate debate = new Debate(id, proposition, description, createdAt);
+            Debate debate = new Debate(id, proposition, description, createdAt, creatorId);
             debate.status = this.status;
             debate.participants.addAll(this.participants);
             debate.startedAt = this.startedAt;
