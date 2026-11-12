@@ -117,13 +117,13 @@ public class JpaDebateRepositoryIntegrationTest {
 
         debateRepository.save(debate);
 
-        boolean exists = debateRepository.existsByCreatorIdAndStatusIn(
+        boolean exists = debateRepository.existsByParticipantIdAndStatusIn(
                 creatorId,
                 Set.of(debate.getStatus())
         );
 
         assertTrue(exists);
-        assertFalse(debateRepository.existsByCreatorIdAndStatusIn(
+        assertFalse(debateRepository.existsByParticipantIdAndStatusIn(
                 UUID.randomUUID(),
                 Set.of(DebateStatus.ONGOING)
         ));

@@ -13,7 +13,9 @@ public interface DebateRepository {
 
     PagedResult<Debate> findDebatesPage(int page, int size);
 
-    boolean existsByCreatorIdAndStatusIn(UUID creatorId, Set<DebateStatus> statuses);
+    boolean existsByParticipantIdAndStatusIn(UUID creatorId, Set<DebateStatus> statuses);
 
     Optional<Debate> findById(UUID debateId);
+
+    Optional<Debate> findByIdForUpdate(UUID debateId);
 }

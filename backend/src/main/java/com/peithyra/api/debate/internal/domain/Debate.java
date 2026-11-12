@@ -70,11 +70,57 @@ public class Debate {
 
         this.participants.add(new Participant(userId, Instant.now(), side));
 
-        if (this.participants.size() == 2) {
-            this.status = DebateStatus.ONGOING;
-            this.startedAt = Instant.now();
+        if (this.participants.size() >= 2) {
+            this.status = DebateStatus.WAITING_FOR_READY;
         }
+        this.updatedAt = Instant.now();
     }
+
+    public void markParticipantReady(UUID userId) {
+        if (status != DebateStatus.WAITING_FOR_READY) {
+            throw new IllegalStateException(
+                    "Debate is not waiting for participants to be ready."
+            );
+        }
+
+        for (int i = 0; i < participants.size(); i++) {
+            Participant participant = participants.get(i);
+
+            if (participant.userId().equals(userId)) {
+                if (participant.isReady()) {
+                    return;
+                }
+
+                participants.set(i, new Participant(
+                        participant.userId(),
+                        participant.joinedAt(),
+                        participant.side(),
+                        true
+                ));
+                updatedAt = Instant.now();
+                return;
+            }
+        }
+
+        throw new IllegalArgumentException(
+                "User is not a participant in this debate."
+        );
+    }
+
+//    public void startDebate() {
+//        if (this.status != DebateStatus.WAITING_FOR_READY) {
+//            throw new IllegalStateException("Debate cannot be started unless it is waiting for ready.");
+//        }
+//
+//        boolean allReady = this.status == DebateStatus.WAITING_FOR_READY && this.participants.stream().allMatch(Participant::isReady);
+//
+//        if (!allReady) {
+//            throw new IllegalStateException("Cannot start debate until all participants are ready.");
+//        }
+//
+//        this.status = DebateStatus.ONGOING;
+//        this.startedAt = Instant.now();
+//    }
 
     public List<Participant> getParticipants() {
         return Collections.unmodifiableList(this.participants);

@@ -3,6 +3,9 @@ package com.peithyra.api.debate.adapters;
 import com.peithyra.api.debate.internal.adapters.web.DebateController;
 import com.peithyra.api.debate.internal.application.dto.*;
 import com.peithyra.api.debate.internal.application.exception.DebateAlreadyOngoingException;
+import com.peithyra.api.debate.internal.application.exception.DebateNotFoundException;
+import com.peithyra.api.debate.internal.application.exception.DebateNotJoinableException;
+import com.peithyra.api.debate.internal.application.port.in.JoinDebateUseCase;
 import com.peithyra.api.debate.internal.application.port.in.CreateDebateUseCase;
 import com.peithyra.api.debate.internal.application.port.in.ListDebatesUseCase;
 import com.peithyra.api.config.security.SecurityConfig;
@@ -28,6 +31,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
@@ -35,6 +39,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
 @WebMvcTest(controllers = DebateController.class)
 @Import(SecurityConfig.class)
@@ -58,6 +63,97 @@ public class DebateControllerTest {
 
     @MockitoBean
     private ReadDebateUseCase readDebateUseCase;
+
+    @MockitoBean
+    private JoinDebateUseCase joinDebateUseCase;
+
+    @Test
+    void shouldJoinDebateAsAuthenticatedUserAndReturnNoContent() throws Exception {
+        UUID debateId = UUID.randomUUID();
+        UUID userId = givenCurrentUser();
+
+        mockMvc.perform(post("/api/debates/{debateId}/join", debateId)
+                        .with(jwt().jwt(token -> token.subject("kinde-user-id"))))
+                .andExpect(status().isNoContent())
+                .andExpect(content().string(""));
+
+        verify(joinDebateUseCase).execute(debateId, userId);
+    }
+
+    @Test
+    void shouldRejectJoinWithoutAuthentication() throws Exception {
+        mockMvc.perform(post("/api/debates/{debateId}/join", UUID.randomUUID()))
+                .andExpect(status().isUnauthorized());
+
+        verifyNoInteractions(joinDebateUseCase);
+    }
+
+    @Test
+    void shouldRejectJoinWithoutOnboardedProfile() throws Exception {
+        when(getUserUseCase.execute("kinde-user-id")).thenReturn(Optional.empty());
+
+        mockMvc.perform(post("/api/debates/{debateId}/join", UUID.randomUUID())
+                        .with(jwt().jwt(token -> token.subject("kinde-user-id"))))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("ONBOARDING_REQUIRED"));
+
+        verifyNoInteractions(joinDebateUseCase);
+    }
+
+    @Test
+    void shouldRejectJoinWithInvalidDebateId() throws Exception {
+        mockMvc.perform(post("/api/debates/not-a-uuid/join")
+                        .with(jwt().jwt(token -> token.subject("kinde-user-id"))))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(joinDebateUseCase);
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenJoiningMissingDebate() throws Exception {
+        UUID debateId = UUID.randomUUID();
+        UUID userId = givenCurrentUser();
+        doThrow(new DebateNotFoundException("Debate not found"))
+                .when(joinDebateUseCase).execute(debateId, userId);
+
+        mockMvc.perform(post("/api/debates/{debateId}/join", debateId)
+                        .with(jwt().jwt(token -> token.subject("kinde-user-id"))))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("DEBATE_NOT_FOUND"));
+    }
+
+    @Test
+    void shouldReturnConflictWhenJoiningWithActiveDebate() throws Exception {
+        UUID debateId = UUID.randomUUID();
+        UUID userId = givenCurrentUser();
+        doThrow(new DebateAlreadyOngoingException("User already has a debate in progress"))
+                .when(joinDebateUseCase).execute(debateId, userId);
+
+        mockMvc.perform(post("/api/debates/{debateId}/join", debateId)
+                        .with(jwt().jwt(token -> token.subject("kinde-user-id"))))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("DEBATE_ALREADY_ONGOING"));
+    }
+
+    @Test
+    void shouldReturnConflictWhenDebateIsNotJoinable() throws Exception {
+        UUID debateId = UUID.randomUUID();
+        UUID userId = givenCurrentUser();
+        doThrow(new DebateNotJoinableException("Debate is not available for joining"))
+                .when(joinDebateUseCase).execute(debateId, userId);
+
+        mockMvc.perform(post("/api/debates/{debateId}/join", debateId)
+                        .with(jwt().jwt(token -> token.subject("kinde-user-id"))))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("DEBATE_NOT_JOINABLE"));
+    }
+
+    private UUID givenCurrentUser() {
+        UUID userId = UUID.randomUUID();
+        when(getUserUseCase.execute("kinde-user-id"))
+                .thenReturn(Optional.of(new UserView(userId, "alice", "kinde-user-id")));
+        return userId;
+    }
 
     @Test
     void shouldReturnCreatedWhenDebateIsCreated() throws Exception {
