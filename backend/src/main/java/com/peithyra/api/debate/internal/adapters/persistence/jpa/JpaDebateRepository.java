@@ -54,8 +54,7 @@ public class JpaDebateRepository implements DebateRepository {
     }
 
     @Override
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
     public Optional<Debate> findByIdForUpdate(UUID debateId) {
-        return repository.findById(debateId).map(DebateJpaEntity::toDomain);
+        return repository.findDebateJpaEntityById(debateId).map(DebateJpaEntity::toDomain);
     }
 }
