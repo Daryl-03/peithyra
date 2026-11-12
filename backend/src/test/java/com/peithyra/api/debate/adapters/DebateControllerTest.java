@@ -4,7 +4,7 @@ import com.peithyra.api.debate.internal.adapters.web.DebateController;
 import com.peithyra.api.debate.internal.application.dto.*;
 import com.peithyra.api.debate.internal.application.exception.DebateAlreadyOngoingException;
 import com.peithyra.api.debate.internal.application.exception.DebateNotFoundException;
-import com.peithyra.api.debate.internal.application.exception.DebateNotJoinableException;
+import com.peithyra.api.debate.internal.domain.exceptions.DebateNotJoinableException;
 import com.peithyra.api.debate.internal.application.port.in.JoinDebateUseCase;
 import com.peithyra.api.debate.internal.application.port.in.LeaveDebateUseCase;
 import com.peithyra.api.debate.internal.application.port.in.CreateDebateUseCase;
@@ -71,22 +71,28 @@ public class DebateControllerTest {
     @MockitoBean
     private LeaveDebateUseCase leaveDebateUseCase;
 
+    // JoinDebateUseCase
+
     @Test
     void shouldJoinDebateAsAuthenticatedUserAndReturnNoContent() throws Exception {
         UUID debateId = UUID.randomUUID();
         UUID userId = givenCurrentUser();
 
         mockMvc.perform(post("/api/debates/{debateId}/join", debateId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"side\":\"AGAINST\"}")
                         .with(jwt().jwt(token -> token.subject("kinde-user-id"))))
                 .andExpect(status().isNoContent())
                 .andExpect(content().string(""));
 
-        verify(joinDebateUseCase).execute(debateId, userId);
+        verify(joinDebateUseCase).execute(new JoinDebateCommand(debateId, userId, DebateSide.AGAINST));
     }
 
     @Test
     void shouldRejectJoinWithoutAuthentication() throws Exception {
-        mockMvc.perform(post("/api/debates/{debateId}/join", UUID.randomUUID()))
+        mockMvc.perform(post("/api/debates/{debateId}/join", UUID.randomUUID())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"side\":\"AGAINST\"}"))
                 .andExpect(status().isUnauthorized());
 
         verifyNoInteractions(joinDebateUseCase);
@@ -97,6 +103,8 @@ public class DebateControllerTest {
         when(getUserUseCase.execute("kinde-user-id")).thenReturn(Optional.empty());
 
         mockMvc.perform(post("/api/debates/{debateId}/join", UUID.randomUUID())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"side\":\"AGAINST\"}")
                         .with(jwt().jwt(token -> token.subject("kinde-user-id"))))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("ONBOARDING_REQUIRED"));
@@ -107,6 +115,8 @@ public class DebateControllerTest {
     @Test
     void shouldRejectJoinWithInvalidDebateId() throws Exception {
         mockMvc.perform(post("/api/debates/not-a-uuid/join")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"side\":\"AGAINST\"}")
                         .with(jwt().jwt(token -> token.subject("kinde-user-id"))))
                 .andExpect(status().isBadRequest());
 
@@ -118,9 +128,11 @@ public class DebateControllerTest {
         UUID debateId = UUID.randomUUID();
         UUID userId = givenCurrentUser();
         doThrow(new DebateNotFoundException("Debate not found"))
-                .when(joinDebateUseCase).execute(debateId, userId);
+                .when(joinDebateUseCase).execute(new JoinDebateCommand(debateId, userId, DebateSide.AGAINST));
 
         mockMvc.perform(post("/api/debates/{debateId}/join", debateId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"side\":\"AGAINST\"}")
                         .with(jwt().jwt(token -> token.subject("kinde-user-id"))))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("DEBATE_NOT_FOUND"));
@@ -131,9 +143,11 @@ public class DebateControllerTest {
         UUID debateId = UUID.randomUUID();
         UUID userId = givenCurrentUser();
         doThrow(new DebateAlreadyOngoingException("User already has a debate in progress"))
-                .when(joinDebateUseCase).execute(debateId, userId);
+                .when(joinDebateUseCase).execute(new JoinDebateCommand(debateId, userId, DebateSide.AGAINST));
 
         mockMvc.perform(post("/api/debates/{debateId}/join", debateId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"side\":\"AGAINST\"}")
                         .with(jwt().jwt(token -> token.subject("kinde-user-id"))))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("DEBATE_ALREADY_ONGOING"));
@@ -144,20 +158,96 @@ public class DebateControllerTest {
         UUID debateId = UUID.randomUUID();
         UUID userId = givenCurrentUser();
         doThrow(new DebateNotJoinableException("Debate is not available for joining"))
-                .when(joinDebateUseCase).execute(debateId, userId);
+                .when(joinDebateUseCase).execute(new JoinDebateCommand(debateId, userId, DebateSide.AGAINST));
 
         mockMvc.perform(post("/api/debates/{debateId}/join", debateId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"side\":\"AGAINST\"}")
                         .with(jwt().jwt(token -> token.subject("kinde-user-id"))))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("DEBATE_NOT_JOINABLE"));
     }
 
-    private UUID givenCurrentUser() {
-        UUID userId = UUID.randomUUID();
-        when(getUserUseCase.execute("kinde-user-id"))
-                .thenReturn(Optional.of(new UserView(userId, "alice", "kinde-user-id")));
-        return userId;
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(strings = {"{}", "{\"side\":null}", "{\"side\":\"UNKNOWN\"}"})
+    void shouldRejectMissingOrInvalidJoinSide(String body) throws Exception {
+        mockMvc.perform(post("/api/debates/{debateId}/join", UUID.randomUUID())
+                        .with(jwt())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest());
+        verifyNoInteractions(joinDebateUseCase);
     }
+
+    @Test
+    void shouldReturnConflictWhenRequestedSideIsFull() throws Exception {
+        UUID debateId = UUID.randomUUID();
+        UUID userId = givenCurrentUser();
+        doThrow(new com.peithyra.api.debate.internal.domain.exceptions.DebateSideFullException("Debate side is full."))
+                .when(joinDebateUseCase).execute(new JoinDebateCommand(debateId, userId, DebateSide.FOR));
+
+        mockMvc.perform(post("/api/debates/{debateId}/join", debateId)
+                        .with(jwt().jwt(token -> token.subject("kinde-user-id")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"side\":\"FOR\"}"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("DEBATE_SIDE_FULL"));
+    }
+
+    // LeaveDebateUseCase
+
+    @Test
+    void shouldLeaveAsAuthenticatedUserAndReturnNoContent() throws Exception {
+        UUID debateId = UUID.randomUUID();
+        UUID userId = givenCurrentUser();
+
+        mockMvc.perform(post("/api/debates/{debateId}/leave", debateId)
+                        .with(jwt().jwt(token -> token.subject("kinde-user-id"))))
+                .andExpect(status().isNoContent())
+                .andExpect(content().string(""));
+
+        verify(leaveDebateUseCase).execute(debateId, userId);
+    }
+
+    @Test
+    void shouldRejectLeaveWithoutAuthentication() throws Exception {
+        mockMvc.perform(post("/api/debates/{debateId}/leave", UUID.randomUUID()))
+                .andExpect(status().isUnauthorized());
+        verifyNoInteractions(leaveDebateUseCase);
+    }
+
+    @Test
+    void shouldRejectLeaveWithoutOnboardedProfile() throws Exception {
+        when(getUserUseCase.execute("kinde-user-id")).thenReturn(Optional.empty());
+        mockMvc.perform(post("/api/debates/{debateId}/leave", UUID.randomUUID())
+                        .with(jwt().jwt(token -> token.subject("kinde-user-id"))))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("ONBOARDING_REQUIRED"));
+        verifyNoInteractions(leaveDebateUseCase);
+    }
+
+    @Test
+    void shouldRejectLeaveWithInvalidDebateId() throws Exception {
+        mockMvc.perform(post("/api/debates/not-a-uuid/leave")
+                        .with(jwt().jwt(token -> token.subject("kinde-user-id"))))
+                .andExpect(status().isBadRequest());
+        verifyNoInteractions(leaveDebateUseCase);
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenLeavingMissingDebate() throws Exception {
+        UUID debateId = UUID.randomUUID();
+        UUID userId = givenCurrentUser();
+        doThrow(new DebateNotFoundException("Debate not found"))
+                .when(leaveDebateUseCase).execute(debateId, userId);
+
+        mockMvc.perform(post("/api/debates/{debateId}/leave", debateId)
+                        .with(jwt().jwt(token -> token.subject("kinde-user-id"))))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("DEBATE_NOT_FOUND"));
+    }
+
+    // CreateDebateUseCase
 
     @Test
     void shouldReturnCreatedWhenDebateIsCreated() throws Exception {
@@ -255,31 +345,6 @@ public class DebateControllerTest {
     }
 
     @Test
-    void shouldListDebatesUsingRequestedPagination() throws Exception {
-        ListDebateCommand expectedCommand = new ListDebateCommand(2, 5);
-
-        when(listDebatesUseCase.execute(expectedCommand))
-                .thenReturn(new PagedResult<>(
-                        List.of(),
-                        2,
-                        5,
-                        0,
-                        0
-                ));
-
-        mockMvc.perform(get("/api/debates")
-                        .param("page", "2")
-                        .param("size", "5"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.page").value(2))
-                .andExpect(jsonPath("$.size").value(5))
-                .andExpect(jsonPath("$.totalElements").value(0))
-                .andExpect(jsonPath("$.content").isArray());
-
-        verify(listDebatesUseCase).execute(expectedCommand);
-    }
-
-    @Test
     void shouldHandleDebateAlreadyOngoingException() throws Exception {
         UUID creatorId = UUID.randomUUID();
         DebateFormat debateFormat = new DebateFormat(3, 60);
@@ -317,6 +382,35 @@ public class DebateControllerTest {
         verify(createDebateUseCase).execute(expectedCommand);
     }
 
+    // ListDebatesUseCase
+
+    @Test
+    void shouldListDebatesUsingRequestedPagination() throws Exception {
+        ListDebateCommand expectedCommand = new ListDebateCommand(2, 5);
+
+        when(listDebatesUseCase.execute(expectedCommand))
+                .thenReturn(new PagedResult<>(
+                        List.of(),
+                        2,
+                        5,
+                        0,
+                        0
+                ));
+
+        mockMvc.perform(get("/api/debates")
+                        .param("page", "2")
+                        .param("size", "5"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.page").value(2))
+                .andExpect(jsonPath("$.size").value(5))
+                .andExpect(jsonPath("$.totalElements").value(0))
+                .andExpect(jsonPath("$.content").isArray());
+
+        verify(listDebatesUseCase).execute(expectedCommand);
+    }
+
+    // ReadDebateUseCase
+
     @Test
     void shouldReturnDebateDetailsWhenGetDebateById() throws Exception {
         UUID debateId = UUID.randomUUID();
@@ -349,4 +443,13 @@ public class DebateControllerTest {
                 .andExpect(jsonPath("$.format.turnTimeLimitSeconds").value(60))
                 .andExpect(jsonPath("$.description").value("This is about the relationship between moral and legal principles."));
     }
+    // Test helpers
+
+    private UUID givenCurrentUser() {
+        UUID userId = UUID.randomUUID();
+        when(getUserUseCase.execute("kinde-user-id"))
+                .thenReturn(Optional.of(new UserView(userId, "alice", "kinde-user-id")));
+        return userId;
+    }
+
 }

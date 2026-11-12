@@ -1,6 +1,7 @@
 package com.peithyra.api.debate.internal.adapters.web;
 
 import com.peithyra.api.debate.internal.adapters.web.dto.CreateDebateRequest;
+import com.peithyra.api.debate.internal.adapters.web.dto.JoinDebateRequest;
 import com.peithyra.api.debate.internal.application.dto.*;
 import com.peithyra.api.debate.internal.application.port.in.CreateDebateUseCase;
 import com.peithyra.api.debate.internal.application.port.in.JoinDebateUseCase;
@@ -60,8 +61,8 @@ public class DebateController {
 
     @PostMapping("/{debateId}/join")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void joinDebate(@PathVariable UUID debateId, @CurrentUser UserView currentUser) {
-        joinDebateUseCase.execute(debateId, currentUser.id());
+    public void joinDebate(@PathVariable UUID debateId, @RequestBody @Valid JoinDebateRequest request, @CurrentUser UserView currentUser) {
+        joinDebateUseCase.execute(request.toCommand(debateId, currentUser.id()));
     }
 
     @PostMapping("/{debateId}/leave")

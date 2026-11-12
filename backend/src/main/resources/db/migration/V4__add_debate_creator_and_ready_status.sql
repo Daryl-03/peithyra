@@ -23,3 +23,7 @@ ALTER TABLE debate_participants
 
 ALTER TABLE debate_participants
     ADD column is_ready boolean not null default false;
+
+ALTER TABLE debates
+    ADD COLUMN participants_per_side integer not null default 1
+        CHECK (participants_per_side >= 1);

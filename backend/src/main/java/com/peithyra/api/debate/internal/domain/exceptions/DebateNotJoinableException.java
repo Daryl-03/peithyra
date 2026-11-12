@@ -1,4 +1,4 @@
-package com.peithyra.api.debate.internal.application.exception;
+package com.peithyra.api.debate.internal.domain.exceptions;
 
 public class DebateNotJoinableException extends RuntimeException {
     public DebateNotJoinableException(String s) {

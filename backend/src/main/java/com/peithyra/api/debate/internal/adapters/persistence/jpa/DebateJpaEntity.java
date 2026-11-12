@@ -29,6 +29,7 @@ public class DebateJpaEntity {
     private Instant endedAt;
     private int numberOfTurns;
     private int turnTimeLimitSeconds;
+    private int participantsPerSide;
 
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(
@@ -64,7 +65,7 @@ public class DebateJpaEntity {
         entity.endedAt = debate.getEndedAt();
         entity.numberOfTurns = debate.getFormat().numberOfTurns();
         entity.turnTimeLimitSeconds = debate.getFormat().turnTimeLimitSeconds();
-
+        entity.participantsPerSide = debate.getFormat().participantsPerSide();
         entity.participants = debate.getParticipants().stream()
                 .map(ParticipantJpaEmbeddable::fromDomain)
                 .toList();
@@ -99,7 +100,8 @@ public class DebateJpaEntity {
                 .withFormat(
                         new DebateFormat(
                                 entity.numberOfTurns,
-                                entity.turnTimeLimitSeconds
+                                entity.turnTimeLimitSeconds,
+                                entity.participantsPerSide
                         )
                 )
                 .build();

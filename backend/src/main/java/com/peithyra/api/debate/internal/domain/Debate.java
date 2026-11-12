@@ -1,6 +1,7 @@
 package com.peithyra.api.debate.internal.domain;
 
-import com.peithyra.api.debate.internal.domain.exceptions.DebateSideAlreadyTakenException;
+import com.peithyra.api.debate.internal.domain.exceptions.DebateSideFullException;
+import com.peithyra.api.debate.internal.domain.exceptions.DebateNotJoinableException;
 import com.peithyra.api.debate.internal.domain.exceptions.ParticipantAlreadyJoinedException;
 
 import java.time.Instant;
@@ -50,8 +51,9 @@ public class Debate {
     }
 
     public void addParticipant(DebateSide side, UUID userId) {
+        Objects.requireNonNull(side, "side is required");
         if (status != DebateStatus.WAITING_FOR_OPPONENT) {
-            throw new IllegalStateException("Cannot add participant to a debate that is not waiting for an opponent.");
+            throw new DebateNotJoinableException("Debate is not available for joining");
         }
 
         boolean alreadyIn = this.participants.stream()
@@ -61,18 +63,13 @@ public class Debate {
             throw new ParticipantAlreadyJoinedException("User is already a participant in this debate.");
         }
 
-        boolean sideAlreadyTaken = this.participants.stream()
-                .anyMatch(p -> p.side().equals(side));
-
-        if (sideAlreadyTaken) {
-            throw new DebateSideAlreadyTakenException("Debate side is already taken.");
+        if (isSideFull(side)) {
+            throw new DebateSideFullException("Debate side is full.");
         }
 
         this.participants.add(new Participant(userId, Instant.now(), side));
 
-        if (this.participants.size() >= 2) {
-            this.status = DebateStatus.WAITING_FOR_READY;
-        }
+        refreshWaitingStatus();
         this.updatedAt = Instant.now();
     }
 
@@ -98,7 +95,7 @@ public class Debate {
         participants.replaceAll(participant -> new Participant(
                 participant.userId(), participant.joinedAt(), participant.side(), false
         ));
-        status = DebateStatus.WAITING_FOR_OPPONENT;
+        refreshWaitingStatus();
         updatedAt = Instant.now();
     }
 
@@ -159,6 +156,18 @@ public class Debate {
 //        this.status = DebateStatus.ONGOING;
 //        this.startedAt = Instant.now();
 //    }
+
+    private boolean isFull() {
+        return this.participants.size() >= format.participantsPerSide() * 2;
+    }
+
+    private boolean isSideFull(DebateSide side) {
+        return participants.stream().filter(p -> p.side() == side).count() >= format.participantsPerSide();
+    }
+
+    private void refreshWaitingStatus() {
+        status = isFull() ? DebateStatus.WAITING_FOR_READY : DebateStatus.WAITING_FOR_OPPONENT;
+    }
 
     public List<Participant> getParticipants() {
         return Collections.unmodifiableList(this.participants);
