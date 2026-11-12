@@ -4,6 +4,7 @@ import com.peithyra.api.debate.internal.adapters.web.dto.CreateDebateRequest;
 import com.peithyra.api.debate.internal.application.dto.*;
 import com.peithyra.api.debate.internal.application.port.in.CreateDebateUseCase;
 import com.peithyra.api.debate.internal.application.port.in.JoinDebateUseCase;
+import com.peithyra.api.debate.internal.application.port.in.LeaveDebateUseCase;
 import com.peithyra.api.debate.internal.application.port.in.ListDebatesUseCase;
 import com.peithyra.api.debate.internal.application.port.in.ReadDebateUseCase;
 import com.peithyra.api.identity.UserView;
@@ -25,12 +26,14 @@ public class DebateController {
     private final ListDebatesUseCase listDebatesUseCase;
     private final ReadDebateUseCase readDebateUseCase;
     private final JoinDebateUseCase joinDebateUseCase;
+    private final LeaveDebateUseCase leaveDebateUseCase;
 
-    public DebateController(CreateDebateUseCase createDebateUseCase, ListDebatesUseCase listDebatesUseCase, ReadDebateUseCase readDebateUseCase, JoinDebateUseCase joinDebateUseCase) {
+    public DebateController(CreateDebateUseCase createDebateUseCase, ListDebatesUseCase listDebatesUseCase, ReadDebateUseCase readDebateUseCase, JoinDebateUseCase joinDebateUseCase, LeaveDebateUseCase leaveDebateUseCase) {
         this.createDebateUseCase = createDebateUseCase;
         this.listDebatesUseCase = listDebatesUseCase;
         this.readDebateUseCase = readDebateUseCase;
         this.joinDebateUseCase = joinDebateUseCase;
+        this.leaveDebateUseCase = leaveDebateUseCase;
     }
 
     @PostMapping
@@ -59,5 +62,11 @@ public class DebateController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void joinDebate(@PathVariable UUID debateId, @CurrentUser UserView currentUser) {
         joinDebateUseCase.execute(debateId, currentUser.id());
+    }
+
+    @PostMapping("/{debateId}/leave")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void leaveDebate(@PathVariable UUID debateId, @CurrentUser UserView currentUser) {
+        leaveDebateUseCase.execute(debateId, currentUser.id());
     }
 }

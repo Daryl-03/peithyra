@@ -6,6 +6,7 @@ import com.peithyra.api.debate.internal.application.exception.DebateAlreadyOngoi
 import com.peithyra.api.debate.internal.application.exception.DebateNotFoundException;
 import com.peithyra.api.debate.internal.application.exception.DebateNotJoinableException;
 import com.peithyra.api.debate.internal.application.port.in.JoinDebateUseCase;
+import com.peithyra.api.debate.internal.application.port.in.LeaveDebateUseCase;
 import com.peithyra.api.debate.internal.application.port.in.CreateDebateUseCase;
 import com.peithyra.api.debate.internal.application.port.in.ListDebatesUseCase;
 import com.peithyra.api.config.security.SecurityConfig;
@@ -66,6 +67,9 @@ public class DebateControllerTest {
 
     @MockitoBean
     private JoinDebateUseCase joinDebateUseCase;
+
+    @MockitoBean
+    private LeaveDebateUseCase leaveDebateUseCase;
 
     @Test
     void shouldJoinDebateAsAuthenticatedUserAndReturnNoContent() throws Exception {

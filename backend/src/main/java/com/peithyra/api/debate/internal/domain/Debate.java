@@ -76,6 +76,44 @@ public class Debate {
         this.updatedAt = Instant.now();
     }
 
+    public void cancel(UUID userId) {
+        requireWaitingDebate();
+        requireParticipant(userId);
+        if (!creatorId.equals(userId)) {
+            throw new IllegalArgumentException("Only the creator can cancel this debate.");
+        }
+
+        status = DebateStatus.CANCELED;
+        updatedAt = Instant.now();
+    }
+
+    public void removeParticipant(UUID userId) {
+        requireWaitingDebate();
+        requireParticipant(userId);
+        if (creatorId.equals(userId)) {
+            throw new IllegalArgumentException("The creator must cancel the debate instead of leaving.");
+        }
+
+        participants.removeIf(participant -> participant.userId().equals(userId));
+        participants.replaceAll(participant -> new Participant(
+                participant.userId(), participant.joinedAt(), participant.side(), false
+        ));
+        status = DebateStatus.WAITING_FOR_OPPONENT;
+        updatedAt = Instant.now();
+    }
+
+    private void requireWaitingDebate() {
+        if (status != DebateStatus.WAITING_FOR_OPPONENT && status != DebateStatus.WAITING_FOR_READY) {
+            throw new IllegalStateException("Participants can only leave or cancel a debate before it starts.");
+        }
+    }
+
+    private void requireParticipant(UUID userId) {
+        if (participants.stream().noneMatch(participant -> participant.userId().equals(userId))) {
+            throw new IllegalArgumentException("User is not a participant in this debate.");
+        }
+    }
+
     public void markParticipantReady(UUID userId) {
         if (status != DebateStatus.WAITING_FOR_READY) {
             throw new IllegalStateException(
