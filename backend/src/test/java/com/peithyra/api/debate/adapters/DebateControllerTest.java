@@ -426,10 +426,11 @@ public class DebateControllerTest {
                         debateFormat,
                         creatorId,
                         Instant.now(),
-                        List.of(new ParticipantSummary(
+                        List.of(new ParticipantDetails(
                                 creatorId,
                                 "John Doe",
-                                DebateSide.FOR
+                                DebateSide.FOR,
+                                false
                         ))
                 ));
 

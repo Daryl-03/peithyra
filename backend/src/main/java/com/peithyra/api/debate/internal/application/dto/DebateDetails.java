@@ -15,6 +15,6 @@ public record DebateDetails(
         DebateFormat format,
         UUID creatorId,
         Instant createdAt,
-        List<ParticipantSummary> participants
+        List<ParticipantDetails> participants
 ) {
 }
