@@ -14,6 +14,9 @@ import com.peithyra.api.debate.internal.application.port.in.ReadDebateUseCase;
 import com.peithyra.api.debate.internal.domain.DebateFormat;
 import com.peithyra.api.debate.internal.domain.DebateSide;
 import com.peithyra.api.debate.internal.domain.DebateStatus;
+import com.peithyra.api.debate.internal.application.port.in.ToggleParticipantReadyUseCase;
+import com.peithyra.api.debate.internal.domain.exceptions.DebateNotWaitingForReadyException;
+import com.peithyra.api.debate.internal.domain.exceptions.ParticipantNotFoundException;
 import com.peithyra.api.identity.GetUserUseCase;
 import com.peithyra.api.identity.UserView;
 import org.junit.jupiter.api.Test;
@@ -70,6 +73,26 @@ public class DebateControllerTest {
 
     @MockitoBean
     private LeaveDebateUseCase leaveDebateUseCase;
+
+    @MockitoBean
+    private ToggleParticipantReadyUseCase toggleParticipantReadyUseCase;
+
+    @Test
+    void shouldToggleReadinessForAuthenticatedUser() throws Exception {
+        UUID debateId = UUID.randomUUID();
+        UUID userId = givenCurrentUser();
+        mockMvc.perform(post("/api/debates/{debateId}/ready/toggle", debateId)
+                        .with(jwt().jwt(token -> token.subject("kinde-user-id"))))
+                .andExpect(status().isNoContent());
+        verify(toggleParticipantReadyUseCase).execute(debateId, userId);
+    }
+
+    @Test
+    void shouldRejectAnonymousReadinessToggle() throws Exception {
+        mockMvc.perform(post("/api/debates/{debateId}/ready/toggle", UUID.randomUUID()))
+                .andExpect(status().isUnauthorized());
+        verifyNoInteractions(toggleParticipantReadyUseCase);
+    }
 
     // JoinDebateUseCase
 
@@ -451,6 +474,42 @@ public class DebateControllerTest {
         when(getUserUseCase.execute("kinde-user-id"))
                 .thenReturn(Optional.of(new UserView(userId, "alice", "kinde-user-id")));
         return userId;
+    }
+
+    @Test
+    void shouldRejectReadinessToggleForMissingDebate() throws Exception {
+        UUID debateId = UUID.randomUUID();
+        UUID userId = givenCurrentUser();
+        doThrow(new DebateNotFoundException("Rejected"))
+                .when(toggleParticipantReadyUseCase).execute(debateId, userId);
+        mockMvc.perform(post("/api/debates/{debateId}/ready/toggle", debateId)
+                        .with(jwt().jwt(token -> token.subject("kinde-user-id"))))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("DEBATE_NOT_FOUND"));
+    }
+
+    @Test
+    void shouldRejectReadinessToggleForNonParticipant() throws Exception {
+        UUID debateId = UUID.randomUUID();
+        UUID userId = givenCurrentUser();
+        doThrow(new ParticipantNotFoundException("Rejected"))
+                .when(toggleParticipantReadyUseCase).execute(debateId, userId);
+        mockMvc.perform(post("/api/debates/{debateId}/ready/toggle", debateId)
+                        .with(jwt().jwt(token -> token.subject("kinde-user-id"))))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("PARTICIPANT_NOT_FOUND"));
+    }
+
+    @Test
+    void shouldRejectReadinessToggleForInvalidPhase() throws Exception {
+        UUID debateId = UUID.randomUUID();
+        UUID userId = givenCurrentUser();
+        doThrow(new DebateNotWaitingForReadyException("Rejected"))
+                .when(toggleParticipantReadyUseCase).execute(debateId, userId);
+        mockMvc.perform(post("/api/debates/{debateId}/ready/toggle", debateId)
+                        .with(jwt().jwt(token -> token.subject("kinde-user-id"))))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("DEBATE_NOT_WAITING_FOR_READY"));
     }
 
 }

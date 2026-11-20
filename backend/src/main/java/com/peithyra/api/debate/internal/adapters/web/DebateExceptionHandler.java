@@ -6,6 +6,8 @@ import com.peithyra.api.debate.internal.application.exception.DebateNotFoundExce
 import com.peithyra.api.debate.internal.domain.exceptions.DebateNotJoinableException;
 import com.peithyra.api.debate.internal.domain.exceptions.DebateSideFullException;
 import com.peithyra.api.debate.internal.domain.exceptions.ParticipantAlreadyJoinedException;
+import com.peithyra.api.debate.internal.domain.exceptions.DebateNotWaitingForReadyException;
+import com.peithyra.api.debate.internal.domain.exceptions.ParticipantNotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -40,4 +42,14 @@ public class DebateExceptionHandler {
         ApiErrorResponse errorResponse = new ApiErrorResponse("DEBATE_NOT_JOINABLE", ex.getMessage());
         return ResponseEntity.status(409).body(errorResponse);
     }
+    @ExceptionHandler(DebateNotWaitingForReadyException.class)
+    public ResponseEntity<ApiErrorResponse> handleDebateNotWaitingForReadyException(DebateNotWaitingForReadyException ex) {
+        return ResponseEntity.status(409).body(new ApiErrorResponse("DEBATE_NOT_WAITING_FOR_READY", ex.getMessage()));
+    }
+
+    @ExceptionHandler(ParticipantNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleParticipantNotFoundException(ParticipantNotFoundException ex) {
+        return ResponseEntity.status(403).body(new ApiErrorResponse("PARTICIPANT_NOT_FOUND", ex.getMessage()));
+    }
+
 }

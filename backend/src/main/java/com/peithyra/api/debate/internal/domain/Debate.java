@@ -4,6 +4,10 @@ import com.peithyra.api.debate.internal.domain.exceptions.DebateSideFullExceptio
 import com.peithyra.api.debate.internal.domain.exceptions.DebateNotJoinableException;
 import com.peithyra.api.debate.internal.domain.exceptions.ParticipantAlreadyJoinedException;
 
+import com.peithyra.api.debate.internal.domain.exceptions.DebateNotWaitingForReadyException;
+
+import com.peithyra.api.debate.internal.domain.exceptions.ParticipantNotFoundException;
+
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -109,6 +113,21 @@ public class Debate {
         if (participants.stream().noneMatch(participant -> participant.userId().equals(userId))) {
             throw new IllegalArgumentException("User is not a participant in this debate.");
         }
+    }
+
+    public void toggleParticipantReady(UUID userId) {
+        if (status != DebateStatus.WAITING_FOR_READY) {
+            throw new DebateNotWaitingForReadyException(
+                    "Debate is not waiting for participants to be ready.");
+        }
+        Participant participant = participants.stream()
+                .filter(candidate -> candidate.userId().equals(userId))
+                .findFirst()
+                .orElseThrow(() -> new ParticipantNotFoundException(
+                        "User is not a participant in this debate."));
+        participants.set(participants.indexOf(participant), new Participant(
+                participant.userId(), participant.joinedAt(), participant.side(), !participant.isReady()));
+        updatedAt = Instant.now();
     }
 
     public void markParticipantReady(UUID userId) {
