@@ -37,8 +37,7 @@ export function DebateReadyPanel({
 			}
 			toast.success("Vous êtes maintenant prêt.");
 			router.refresh();
-		} catch (error) {
-			console.error("Error toggling ready status:", error);
+		} catch {
 			toast.error("Impossible de modifier votre état. Réessayez.");
 		} finally {
 			setIsPending(false);

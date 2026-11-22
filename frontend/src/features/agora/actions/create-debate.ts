@@ -1,11 +1,10 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import type { InferSafeActionFnResult } from "next-safe-action";
 import { backendFetch } from "@/lib/apis/backend-fetch";
-import { ActionError, authedClient } from "@/lib/apis/safe-action";
+import { authedClient } from "@/lib/apis/safe-action";
 import { createDebateFormSchema } from "../models/create-debate-schema";
-import { red } from "next/dist/lib/picocolors";
+import { ApiError } from "@/lib/apis/api-error";
 import { redirect } from "next/navigation";
 
 export type CreateDebateActionResult = InferSafeActionFnResult<
@@ -23,23 +22,7 @@ export const createDebate = authedClient
             body: JSON.stringify(parsedInput),
         });
 
-        if (!response.ok) {
-            console.error(
-                `Debate creation failed with status ${response.status}: ${await response.clone().text()}`,
-            );
-            if (response.status === 409) {
-                // check code
-                const error = await response.json();
-                if (error.code === "DEBATE_ALREADY_ONGOING") {
-                    throw new ActionError(
-                        "You already have an ongoing debate. Please finish it before starting a new one.",
-                    );
-                }
-            }
-            throw new Error(
-                `Debate creation failed with status ${response.status}`,
-            );
-        }
+        if (!response.ok) throw await ApiError.fromResponse(response);
 
         const debate = await response.json();
         // revalidatePath("/agora");

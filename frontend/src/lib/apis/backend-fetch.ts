@@ -1,4 +1,5 @@
 import "server-only";
+import { ApiError } from "./api-error";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { redirect } from "next/navigation";
 
@@ -21,7 +22,7 @@ export async function backendFetch(
         cache: "no-store",
         ...options,
         headers,
-    });
+    }).catch((error: unknown) => { throw ApiError.fromUnknown(error); });
     if (redirectOnAuthError) {
         if (response.status === 401) redirect("/api/auth/login");
         if (response.status === 403) {

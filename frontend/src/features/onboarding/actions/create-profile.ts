@@ -3,8 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { InferSafeActionFnResult } from "next-safe-action";
+import { ApiError } from "@/lib/apis/api-error";
 import { backendFetch } from "@/lib/apis/backend-fetch";
-import { ActionError, authedClient } from "@/lib/apis/safe-action";
+import { authedClient } from "@/lib/apis/safe-action";
 import { onboardingFormSchema } from "../model/onboarding-schema";
 
 export type CreateProfileActionResult = InferSafeActionFnResult<
@@ -24,16 +25,7 @@ export const createProfile = authedClient
             signal: AbortSignal.timeout(10000),
         });
 
-        if (response.status === 409) {
-            throw new ActionError(
-                "Ce pseudo ou ce compte est déjà enregistré. Essayez un autre pseudo ou revenez aux débats.",
-            );
-        }
-        if (!response.ok) {
-            throw new Error(
-                `Profile creation failed with status ${response.status}`,
-            );
-        }
+        if (!response.ok) throw await ApiError.fromResponse(response);
 
         revalidatePath("/", "layout");
         redirect("/agora");

@@ -43,7 +43,6 @@ export default async function DebatePage({
 
     } catch(error) {
 		unstable_rethrow(error);
-		console.error("Error fetching debate details:", error);
         return (
 			<div className="flex items-center justify-center flex-1">
                 <p role="alert" className="py-8 text-muted-foreground">

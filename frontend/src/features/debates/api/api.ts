@@ -4,37 +4,22 @@ import { backendFetch } from "@/lib/apis/backend-fetch";
 import type { DebateSummary } from "../model/debate-summary";
 import type { DebateDetailsDTO } from "./debate-details-dto";
 import type { DebateSummaryDTO } from "./debate-summary-dto";
-import { red } from "next/dist/lib/picocolors";
+import { ApiError } from "@/lib/apis/api-error";
 import { notFound } from "next/navigation";
 
-export async function getLatestDebates(
-	limit: number,
-): Promise<DebateSummary[]> {
-	try {
-		const response = await fetch(`${process.env.BACKEND_URL}/api/debates?size=${limit}`, {
-			cache: "no-cache"
-		});
-
-		if (!response.ok) {
-			throw new Error(
-				`Failed to fetch latest debates: ${response.statusText}`,
-			);
-		}
-		const data = await response.json();
-		const debates: DebateSummary[] = data.content.map(
-			(debate: DebateSummaryDTO) => ({
-				id: debate.id,
-				proposition: debate.proposition,
-				status: debate.status,
-				createdAt: debate.createdAt,
-				participants: debate.participantViewList,
-			}),
-		);
-		return debates;
-	} catch (error) {
-		console.error("Error fetching latest debates:", error);
-		throw error;
-	}
+export async function getLatestDebates(limit: number): Promise<DebateSummary[]> {
+    const response = await fetch(`${process.env.BACKEND_URL}/api/debates?size=${limit}`, {
+        cache: "no-cache",
+    }).catch((error: unknown) => { throw ApiError.fromUnknown(error); });
+    if (!response.ok) throw await ApiError.fromResponse(response);
+    const data = await response.json();
+    return data.content.map((debate: DebateSummaryDTO) => ({
+        id: debate.id,
+        proposition: debate.proposition,
+        status: debate.status,
+        createdAt: debate.createdAt,
+        participants: debate.participantViewList,
+    }));
 }
 
 export async function getDebateById(
@@ -45,21 +30,13 @@ export async function getDebateById(
 		{
 			cache: "no-cache"
 		}
-	);
+	).catch((error: unknown) => { throw ApiError.fromUnknown(error); });
 
-	if (!response.ok) {
-		if (response.status === 404) {
-			console.debug(`Debate with ID ${debateId} not found.`);
-			notFound();
-		}
-
-		const data = await response.json();
-		console.error(`Error fetching debate with ID ${debateId}:`, data);
-
-		throw new Error(
-			`Failed to fetch debate with ID ${debateId}`,
-		);
-	}
+    if (!response.ok) {
+        const error = await ApiError.fromResponse(response);
+        if (error.status === 404) notFound();
+        throw error;
+    }
 	const data = await response.json();
 	return data as DebateDetailsDTO;
 }
@@ -72,22 +49,7 @@ export async function joinDebate(debateId: string, side: "FOR" | "AGAINST"): Pro
 		body: JSON.stringify({ side }),
 	});
 
-	if (!response.ok) {
-		if( response.status === 409) {
-			const data = await response.json();
-			if (data.code === "DEBATE_ALREADY_ONGOING") {
-				throw new Error(
-					"You already have an ongoing debate. Please finish it before joining a new one.",
-				);
-			}
-		}
-		const data = await response.json();
-		console.error(`Error joining debate with ID ${debateId}:`, data);
-		throw new Error(
-			`Failed to join debate with ID ${debateId}`,
-		);
-	}
-
+    if (!response.ok) throw await ApiError.fromResponse(response);
 }
 
 export async function toggleReadyStatus(debateId: string): Promise<void> {
@@ -95,12 +57,5 @@ export async function toggleReadyStatus(debateId: string): Promise<void> {
 		method: "POST",
 	});
 
-	if (!response.ok) {
-		const data = await response.json();
-		console.error(`Error toggling ready status for debate with ID ${debateId}:`, data);
-		throw new Error(
-			`Failed to toggle ready status for debate with ID ${debateId}`,
-		);
-	}
-	
+    if (!response.ok) throw await ApiError.fromResponse(response);
 }
