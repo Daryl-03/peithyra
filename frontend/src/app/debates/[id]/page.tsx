@@ -8,6 +8,7 @@ import { unstable_rethrow } from "next/navigation";
 import { cp } from "fs";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { is } from "zod/v4/locales/index.js";
 
 export default async function DebatePage({
 	params,
@@ -18,16 +19,15 @@ export default async function DebatePage({
 	const { id: debateId } = await params;
 	const { isAuthenticated } = await getKindeServerSession();
 	const authenticated = await isAuthenticated();
-	const profile = await getCurrentProfile();
+	const profileState = await getCurrentProfile();
+	const profileData = profileState.status === "ready" ? profileState.profile : { id: "", username: "unknown" };
 	let isUserInDebate = false;
 
 	try {
 		debate = await getDebateById(debateId);
-		if (profile.status === "ready") {
-			isUserInDebate = debate.participants.some(
-				(participant) => participant.id === profile?.profile.id,
-			);
-		}
+		isUserInDebate = debate.participants.some(
+			(participant) => participant.id === profileData?.id,
+		);
 	} catch (error) {
 		unstable_rethrow(error);
 		return (
