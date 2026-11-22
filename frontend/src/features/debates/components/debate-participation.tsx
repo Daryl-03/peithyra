@@ -22,7 +22,7 @@ export function DebateParticipation({
                     <p className="text-muted-foreground text-sm">
                         Dès qu’une personne rejoint l'autre camp, le débat
                         commence. Vous serez automatiquement redirigé vers le
-                        débat. Gardez cette page ouverte.
+                        débat. <span className="font-semibold text-foreground">Gardez cette page ouverte.</span>
                     </p>
                 </div>
             );

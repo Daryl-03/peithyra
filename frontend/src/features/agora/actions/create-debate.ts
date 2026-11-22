@@ -43,6 +43,6 @@ export const createDebate = authedClient
 
         const debate = await response.json();
         // revalidatePath("/agora");
-		redirect(`/agora/${debate.id}`);
+		redirect(`/debates/${debate.id}`);
         return debate;
     });
