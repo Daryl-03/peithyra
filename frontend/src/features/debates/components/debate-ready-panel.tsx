@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Clock } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { toast } from "sonner";
-import type { ParticipantDetailsDTO } from "../api/debate-details-dto";
+import { Button } from "@/components/ui/button";
 import type { ToggleReadyActionResult } from "../actions/toggle-ready";
+import type { ParticipantDetailsDTO } from "../api/debate-details-dto";
 
 type DebateReadyPanelProps = {
     participants: ParticipantDetailsDTO[];

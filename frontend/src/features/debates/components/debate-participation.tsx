@@ -1,12 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { useAction } from "next-safe-action/hooks";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import type { DebateStatus } from "@/features/debates/model/debate-summary";
 import { joinDebate } from "../actions/join-debate";
 import { leaveDebate } from "../actions/leave-debate";
-import type { DebateStatus } from "@/features/debates/model/debate-summary";
-import Link from "next/link";
 
 type DebateParticipationProps = {
     debateId: string;

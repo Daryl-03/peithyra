@@ -1,11 +1,11 @@
 import "server-only";
 
+import { notFound } from "next/navigation";
+import { ApiError } from "@/lib/apis/api-error";
 import { backendFetch } from "@/lib/apis/backend-fetch";
 import type { DebateSummary } from "../model/debate-summary";
 import type { DebateDetailsDTO } from "./debate-details-dto";
 import type { DebateSummaryDTO } from "./debate-summary-dto";
-import { ApiError } from "@/lib/apis/api-error";
-import { notFound } from "next/navigation";
 
 export async function getLatestDebates(
     limit: number,

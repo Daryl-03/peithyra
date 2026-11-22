@@ -3,9 +3,9 @@
 import { redirect } from "next/navigation";
 import type { InferSafeActionFnResult } from "next-safe-action";
 import { z } from "zod";
+import { ApiError } from "@/lib/apis/api-error";
 import { backendFetch } from "@/lib/apis/backend-fetch";
 import { actionClient } from "@/lib/apis/safe-action";
-import { ApiError } from "@/lib/apis/api-error";
 
 export type LeaveDebateActionResult = InferSafeActionFnResult<
     typeof leaveDebate

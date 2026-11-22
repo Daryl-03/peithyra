@@ -1,9 +1,9 @@
 "use server";
 
-import { z } from "zod";
-import { toggleReadyStatus } from "../api/api";
-import { actionClient } from "@/lib/apis/safe-action";
 import type { InferSafeActionFnResult } from "next-safe-action";
+import { z } from "zod";
+import { actionClient } from "@/lib/apis/safe-action";
+import { toggleReadyStatus } from "../api/api";
 
 export type ToggleReadyActionResult = InferSafeActionFnResult<
     typeof toggleReadyAction

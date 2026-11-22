@@ -1,9 +1,9 @@
 import "server-only";
-import { ApiError } from "@/lib/apis/api-error";
 
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { z } from "zod";
+import { ApiError } from "@/lib/apis/api-error";
 import { backendFetch } from "@/lib/apis/backend-fetch";
 
 const profileSchema = z.object({

@@ -1,11 +1,11 @@
 "use server";
 
+import { redirect } from "next/navigation";
 import type { InferSafeActionFnResult } from "next-safe-action";
+import { ApiError } from "@/lib/apis/api-error";
 import { backendFetch } from "@/lib/apis/backend-fetch";
 import { authedClient } from "@/lib/apis/safe-action";
 import { createDebateFormSchema } from "../models/create-debate-schema";
-import { ApiError } from "@/lib/apis/api-error";
-import { redirect } from "next/navigation";
 
 export type CreateDebateActionResult = InferSafeActionFnResult<
     typeof createDebate

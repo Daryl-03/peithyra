@@ -1,15 +1,10 @@
-import { getDebateById } from "@/features/debates/api/api";
-import { toggleReadyAction } from "@/features/debates/actions/toggle-ready";
-import { DebateReadyPanel } from "@/features/debates/components/debate-ready-panel";
-import { DebateDetailsDTO } from "@/features/debates/api/debate-details-dto";
-import { ParticipantDetails } from "@/features/debates/model/debate-details";
-import { getCurrentProfile } from "@/features/identity/server/current-profile";
-import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
-import assert from "assert";
-
 import { unstable_rethrow } from "next/dist/client/components/unstable-rethrow.server";
-import { red } from "next/dist/lib/picocolors";
 import { redirect } from "next/navigation";
+import { toggleReadyAction } from "@/features/debates/actions/toggle-ready";
+import { getDebateById } from "@/features/debates/api/api";
+import type { DebateDetailsDTO } from "@/features/debates/api/debate-details-dto";
+import { DebateReadyPanel } from "@/features/debates/components/debate-ready-panel";
+import { getCurrentProfile } from "@/features/identity/server/current-profile";
 
 export default async function DebatePage({
     params,
@@ -18,10 +13,7 @@ export default async function DebatePage({
 }) {
     let debate: DebateDetailsDTO;
     const { id: debateId } = await params;
-    const { isAuthenticated } = await getKindeServerSession();
-    const authenticated = await isAuthenticated();
     const profileData = await getCurrentProfile();
-    let isUserInDebate = false;
 
     try {
         debate = await getDebateById(debateId);
@@ -34,11 +26,11 @@ export default async function DebatePage({
         if (debate.status === "WAITING_FOR_OPPONENT") {
             redirect(`debates/${debateId}`);
         }
-        if (profileData.status === "ready") {
-            isUserInDebate = debate.participants.some(
-                (participant) => participant.id === profileData?.profile.id,
-            );
-        }
+        // if (profileData.status === "ready") {
+        //     isUserInDebate = debate.participants.some(
+        //         (participant) => participant.id === profileData?.profile.id,
+        //     );
+        // }
     } catch (error) {
         unstable_rethrow(error);
         return (

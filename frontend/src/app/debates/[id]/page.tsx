@@ -1,14 +1,12 @@
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
+import { unstable_rethrow } from "next/navigation";
 import { DebateSide } from "@/features/agora/models/debate-side";
 import { getDebateById } from "@/features/debates/api/api";
 import type { DebateDetailsDTO } from "@/features/debates/api/debate-details-dto";
 import { DebateParticipation } from "@/features/debates/components/debate-participation";
 import { getCurrentProfile } from "@/features/identity/server/current-profile";
-import { unstable_rethrow } from "next/navigation";
-import { cp } from "fs";
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
-import { is } from "zod/v4/locales/index.js";
 
 export default async function DebatePage({
     params,
