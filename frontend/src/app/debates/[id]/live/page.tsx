@@ -26,12 +26,12 @@ export default async function DebatePage({
 
 	try {
         debate = await getDebateById(debateId);
-		debate.participants.push({
-			id: "placeholder",
-			username: "hey",
-			side: "FOR",
-			isReady: false,
-		} as ParticipantDetails);
+		// if(debate.participants.length < 2) {debate.participants.push({
+		// 	id: "placeholder",
+		// 	username: "hey",
+		// 	side: "FOR",
+		// 	isReady: false,
+		// } as ParticipantDetails);}
 		if (debate.status === "WAITING_FOR_OPPONENT") {
 			redirect(`debates/${debateId}`);
 		}

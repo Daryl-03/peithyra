@@ -123,7 +123,7 @@ export function DebateParticipation({
 				</h2>
 				<p className="text-muted-foreground text-sm">
 					Vous êtes prêt à participer au débat. Cliquez{" "}
-					<Link href={`/debates/${debateId}`}>ici</Link> pour
+					<Link href={`/debates/${debateId}/live`}><span className="text-primary hover:underline font-semibold">ici</span></Link> pour
 					commencer.
 				</p>
 				<Button
