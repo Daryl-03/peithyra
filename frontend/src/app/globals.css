@@ -3,7 +3,7 @@
 @import "shadcn/tailwind.css";
 
 :root {
-    --background: oklch(0.9848 0.0013 106.42);
+    --background: oklch(98.4% 0.003 247.858);
     --foreground: oklch(0.2687 0.0096 303.84);
 
     --card: oklch(1 0 0);
