@@ -10,23 +10,36 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.dao.DataIntegrityViolationException;
+
 import java.time.Instant;
 import java.util.UUID;
 import java.util.Map;
 import java.util.Set;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @Import(TestcontainersConfiguration.class)
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class JpaUserRepositoryIntegrationTest {
-    @Autowired UserRepository repository;
-    @Autowired SpringDataUserRepository springRepository;
-    @BeforeEach void clean() { springRepository.deleteAll(); }
+    @Autowired
+    UserRepository repository;
+    @Autowired
+    SpringDataUserRepository springRepository;
+    @Autowired
+    JdbcTemplate jdbcTemplate;
 
-    @Test void returnsOnlyRequestedUsernamesAndOmitsUnknownIds() {
+    @BeforeEach
+    void clean() {
+        jdbcTemplate.execute("TRUNCATE TABLE users CASCADE");
+        springRepository.deleteAll();
+    }
+
+    @Test
+    void returnsOnlyRequestedUsernamesAndOmitsUnknownIds() {
         var alice = new User(UUID.randomUUID(), "kinde-1", "Alice");
         var camille = new User(UUID.randomUUID(), "kinde-2", "Camille");
         repository.save(alice);
@@ -37,19 +50,22 @@ class JpaUserRepositoryIntegrationTest {
                 repository.findUsernamesByIds(Set.of(alice.getId(), camille.getId(), UUID.randomUUID())));
     }
 
-    @Test void returnsEmptyUsernamesWhenNoIdsAreKnown() {
+    @Test
+    void returnsEmptyUsernamesWhenNoIdsAreKnown() {
         repository.save(new User(UUID.randomUUID(), "kinde-1", "Alice"));
 
         assertTrue(repository.findUsernamesByIds(Set.of(UUID.randomUUID())).isEmpty());
     }
 
-    @Test void returnsEmptyUsernamesForEmptyIds() {
+    @Test
+    void returnsEmptyUsernamesForEmptyIds() {
         repository.save(new User(UUID.randomUUID(), "kinde-1", "Alice"));
 
         assertTrue(repository.findUsernamesByIds(Set.of()).isEmpty());
     }
 
-    @Test void savesAndRestoresProfileAndDates() {
+    @Test
+    void savesAndRestoresProfileAndDates() {
         var created = Instant.parse("2026-01-01T12:00:00Z");
         var updated = created.plusSeconds(60);
         var user = new User(UUID.randomUUID(), "Alice", "kinde-1", created, updated);
@@ -64,21 +80,27 @@ class JpaUserRepositoryIntegrationTest {
         assertFalse(repository.existsByUsernameIgnoreCase("Camille"));
         assertTrue(repository.findByExternalId("missing").isEmpty());
     }
-    @Test void databaseRejectsDuplicateUsernameIgnoringCaseWithoutPrecheck() {
+
+    @Test
+    void databaseRejectsDuplicateUsernameIgnoringCaseWithoutPrecheck() {
         repository.save(new User(UUID.randomUUID(), "kinde-1", "Alice"));
         var randomId = UUID.randomUUID();
         assertThrows(ProfileConflictException.class,
                 () -> repository.save(new User(randomId, "kinde-2", "ALICE")));
         assertTrue(repository.findByExternalId("kinde-2").isEmpty());
     }
-    @Test void databaseRejectsDuplicateIdentityWithoutPrecheck() {
+
+    @Test
+    void databaseRejectsDuplicateIdentityWithoutPrecheck() {
         repository.save(new User(UUID.randomUUID(), "kinde-1", "Alice"));
         var randomId = UUID.randomUUID();
         assertThrows(ProfileConflictException.class,
                 () -> repository.save(new User(randomId, "kinde-1", "Camille")));
         assertEquals("Alice", repository.findByExternalId("kinde-1").orElseThrow().getUsername());
     }
-    @Test void unrelatedIntegrityErrorsAreNotReportedAsConflicts() {
+
+    @Test
+    void unrelatedIntegrityErrorsAreNotReportedAsConflicts() {
         var randomId = UUID.randomUUID();
         assertThrows(DataIntegrityViolationException.class,
                 () -> repository.save(new User(randomId, null, "Alice")));
