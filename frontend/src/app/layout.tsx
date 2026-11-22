@@ -47,9 +47,11 @@ export default function RootLayout({
             <body className="min-h-screen flex flex-col flex-1 items-center  w-full justify-center">
                 <Header />
 
-                <div className="max-w-6xl w-full xl:max-w-7xl mx-auto flex-1">{children}</div>
-				
-				<Toaster position="top-right" />
+                <div className="max-w-6xl w-full xl:max-w-7xl mx-auto flex-1">
+                    {children}
+                </div>
+
+                <Toaster position="top-right" />
 
                 <footer className="w-full bg-card">
                     <div className="flex items-center justify-between p-8 border-t border-t-primary/10 py-4">

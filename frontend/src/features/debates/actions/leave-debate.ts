@@ -8,17 +8,17 @@ import { actionClient } from "@/lib/apis/safe-action";
 import { ApiError } from "@/lib/apis/api-error";
 
 export type LeaveDebateActionResult = InferSafeActionFnResult<
-	typeof leaveDebate
+    typeof leaveDebate
 >;
 
 export const leaveDebate = actionClient
-	.inputSchema(z.object({ debateId: z.uuid() }))
-	.action(async ({ parsedInput: { debateId } }) => {
-		const response = await backendFetch(`/api/debates/${debateId}/leave`, {
-			method: "POST",
-		});
+    .inputSchema(z.object({ debateId: z.uuid() }))
+    .action(async ({ parsedInput: { debateId } }) => {
+        const response = await backendFetch(`/api/debates/${debateId}/leave`, {
+            method: "POST",
+        });
 
-		if (!response.ok) throw await ApiError.fromResponse(response);
+        if (!response.ok) throw await ApiError.fromResponse(response);
 
-		redirect("/agora");
-	});
+        redirect("/agora");
+    });

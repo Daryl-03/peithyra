@@ -17,18 +17,22 @@ export class ApiError extends Error {
         let code = "UNKNOWN_ERROR";
         let message = DEFAULT_API_ERROR_MESSAGE;
         if (typeof body === "object" && body !== null) {
-            if ("code" in body && typeof body.code === "string" && body.code.trim()) {
+            if (
+                "code" in body &&
+                typeof body.code === "string" &&
+                body.code.trim()
+            ) {
                 code = body.code;
             }
-            if ("message" in body && typeof body.message === "string" && body.message.trim()) {
+            if (
+                "message" in body &&
+                typeof body.message === "string" &&
+                body.message.trim()
+            ) {
                 message = body.message;
             }
         }
-        const error = new ApiError(
-            code,
-            message,
-            response.status,
-        );
+        const error = new ApiError(code, message, response.status);
         console.error("Backend request failed:", {
             url: response.url,
             status: error.status,
@@ -40,7 +44,12 @@ export class ApiError extends Error {
 
     static fromUnknown(cause: unknown): ApiError {
         if (cause instanceof ApiError) return cause;
-        const error = new ApiError("UNKNOWN_ERROR", DEFAULT_API_ERROR_MESSAGE, 500, { cause });
+        const error = new ApiError(
+            "UNKNOWN_ERROR",
+            DEFAULT_API_ERROR_MESSAGE,
+            500,
+            { cause },
+        );
         console.error("Unexpected API error:", error);
         return error;
     }

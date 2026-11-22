@@ -14,7 +14,11 @@ export async function Header() {
     return (
         <header className="w-full bg-card">
             <nav className="flex items-center bg-card max-w-6xl xl:max-w-7xl justify-between p-8 border-b border-b-primary/10 py-4 mx-auto">
-                <Link href="/"><span className="text-xl sm:text-2xl font-bold">Peithyra</span></Link>
+                <Link href="/">
+                    <span className="text-xl sm:text-2xl font-bold">
+                        Peithyra
+                    </span>
+                </Link>
                 <div className="flex gap-1 sm:gap-4">
                     {authenticated ? (
                         <LogoutLink>

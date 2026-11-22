@@ -7,7 +7,7 @@ export type DebateDetailsDTO = {
     status: DebateStatus;
     format: DebateFormatDTO;
     createdAt: string;
-	creatorId: string;
+    creatorId: string;
     participants: ParticipantDetailsDTO[];
 };
 

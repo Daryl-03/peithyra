@@ -22,7 +22,9 @@ export async function backendFetch(
         cache: "no-store",
         ...options,
         headers,
-    }).catch((error: unknown) => { throw ApiError.fromUnknown(error); });
+    }).catch((error: unknown) => {
+        throw ApiError.fromUnknown(error);
+    });
     if (redirectOnAuthError) {
         if (response.status === 401) redirect("/api/auth/login");
         if (response.status === 403) {
