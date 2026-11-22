@@ -5,6 +5,8 @@ import type { InferSafeActionFnResult } from "next-safe-action";
 import { backendFetch } from "@/lib/apis/backend-fetch";
 import { ActionError, authedClient } from "@/lib/apis/safe-action";
 import { createDebateFormSchema } from "../models/create-debate-schema";
+import { red } from "next/dist/lib/picocolors";
+import { redirect } from "next/navigation";
 
 export type CreateDebateActionResult = InferSafeActionFnResult<
     typeof createDebate
@@ -40,6 +42,7 @@ export const createDebate = authedClient
         }
 
         const debate = await response.json();
-        revalidatePath("/agora");
+        // revalidatePath("/agora");
+		redirect(`/agora/${debate.id}`);
         return debate;
     });

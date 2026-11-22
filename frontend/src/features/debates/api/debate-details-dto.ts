@@ -1,5 +1,4 @@
 import type { DebateStatus } from "./../model/debate-summary";
-import type { ParticipantSummaryDTO } from "./debate-summary-dto";
 
 export type DebateDetailsDTO = {
     id: string;
@@ -8,7 +7,14 @@ export type DebateDetailsDTO = {
     status: DebateStatus;
     format: DebateFormatDTO;
     createdAt: string;
-    participants: ParticipantSummaryDTO[];
+    participants: ParticipantDetailsDTO[];
+};
+
+export type ParticipantDetailsDTO = {
+    id: string;
+    username: string;
+    side: "FOR" | "AGAINST";
+    isReady: boolean;
 };
 
 export type DebateFormatDTO = {

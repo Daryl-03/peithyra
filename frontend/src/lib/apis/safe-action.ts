@@ -7,7 +7,7 @@ import { createSafeActionClient } from "next-safe-action";
 // Only messages explicitly intended for the user may cross the server boundary.
 export class ActionError extends Error {}
 
-const actionClient = createSafeActionClient({
+export const actionClient = createSafeActionClient({
     handleServerError(error) {
         if (error instanceof ActionError) return error.message;
         console.error("Server action failed:", error);

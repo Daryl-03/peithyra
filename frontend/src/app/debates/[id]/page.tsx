@@ -4,6 +4,8 @@ import { getDebateById } from "@/features/debates/api/api";
 import type { DebateDetailsDTO } from "@/features/debates/api/debate-details-dto";
 import { DebateParticipation } from "@/features/debates/components/debate-participation";
 import { getCurrentProfile } from "@/features/identity/server/current-profile";
+import { unstable_rethrow } from "next/navigation";
+import { cp } from "fs";
 
 export default async function DebatePage({
     params,
@@ -24,7 +26,9 @@ export default async function DebatePage({
                 (participant) => participant.id === profile?.profile.id,
             );
         }
-    } catch {
+    } catch(error) {
+		unstable_rethrow(error);
+		console.error("Error fetching debate details:", error);
         return (
             <div className="flex items-center justify-center flex-1">
                 <p role="alert" className="py-8 text-muted-foreground">

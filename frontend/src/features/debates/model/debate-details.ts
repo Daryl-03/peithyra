@@ -1,4 +1,4 @@
-import type { DebateStatus, ParticipantSummary } from "./debate-summary";
+import type { DebateStatus } from "./debate-summary";
 
 export type DebateDetails = {
     id: string;
@@ -7,7 +7,14 @@ export type DebateDetails = {
     status: DebateStatus;
     format: DebateFormat;
     createdAt: string;
-    participants: ParticipantSummary[];
+    participants: ParticipantDetails[];
+};
+
+export type ParticipantDetails = {
+    id: string;
+    username: string;
+    side: "FOR" | "AGAINST";
+    isReady: boolean;
 };
 
 export type DebateFormat = {
