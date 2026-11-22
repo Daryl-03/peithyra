@@ -1,17 +1,35 @@
+"use client";
+
+import { useAction } from "next-safe-action/hooks";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/toast";
+import { joinDebate } from "../actions/join-debate";
 import type { DebateStatus } from "@/features/debates/model/debate-summary";
 
 type DebateParticipationProps = {
+    debateId: string;
+    availableSide: "FOR" | "AGAINST" | null;
     status: DebateStatus;
     isParticipant: boolean;
     authenticated: boolean | null;
 };
 
 export function DebateParticipation({
+    debateId,
+    availableSide,
     status,
     isParticipant,
     authenticated,
 }: DebateParticipationProps) {
+    const { execute, isPending } = useAction(joinDebate, {
+        onError: ({ error }) => {
+            toast.add({
+                type: "error",
+                title: error.serverError ?? "Impossible de rejoindre le débat. Réessayez.",
+            });
+        },
+    });
+
     if (status === "WAITING_FOR_OPPONENT") {
         if (isParticipant) {
             return (
@@ -40,8 +58,17 @@ export function DebateParticipation({
                         voix compte !
                     </p>
                 </div>
-                <Button variant="default" size="lg" className="w-full">
-                    Rejoindre le débat
+                <Button
+                    type="button"
+                    variant="default"
+                    size="lg"
+                    className="w-full"
+                    disabled={isPending || !availableSide}
+                    onClick={() => {
+                        if (availableSide) execute({ debateId, side: availableSide });
+                    }}
+                >
+                    {isPending ? "Connexion au débat…" : "Rejoindre le débat"}
                 </Button>
                 {!authenticated && (
                     <p className="text-muted-foreground text-sm">

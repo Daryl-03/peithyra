@@ -137,6 +137,14 @@ export default async function DebatePage({
 					</div>
 
 					<DebateParticipation
+						debateId={debateId}
+						availableSide={
+							!debate.participants.some((participant) => participant.side === "FOR")
+								? "FOR"
+								: !debate.participants.some((participant) => participant.side === "AGAINST")
+									? "AGAINST"
+									: null
+						}
 						status={debate.status}
 						isParticipant={isUserInDebate}
 						authenticated={authenticated}

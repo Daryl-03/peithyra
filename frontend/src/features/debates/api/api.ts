@@ -1,9 +1,11 @@
+import "server-only";
+
 import { backendFetch } from "@/lib/apis/backend-fetch";
 import type { DebateSummary } from "../model/debate-summary";
 import type { DebateDetailsDTO } from "./debate-details-dto";
 import type { DebateSummaryDTO } from "./debate-summary-dto";
 import { red } from "next/dist/lib/picocolors";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
 export async function getLatestDebates(
 	limit: number,
@@ -62,13 +64,23 @@ export async function getDebateById(
 	return data as DebateDetailsDTO;
 }
 
-export async function joinDebate(debateId: string): Promise<void> {
+export async function joinDebate(debateId: string, side: "FOR" | "AGAINST"): Promise<void> {
 
 	const response = await backendFetch(`/api/debates/${debateId}/join`, {
 		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ side }),
 	});
 
 	if (!response.ok) {
+		if( response.status === 409) {
+			const data = await response.json();
+			if (data.code === "DEBATE_ALREADY_ONGOING") {
+				throw new Error(
+					"You already have an ongoing debate. Please finish it before joining a new one.",
+				);
+			}
+		}
 		const data = await response.json();
 		console.error(`Error joining debate with ID ${debateId}:`, data);
 		throw new Error(
@@ -76,7 +88,6 @@ export async function joinDebate(debateId: string): Promise<void> {
 		);
 	}
 
-	redirect(`/debates/${debateId}/live`);
 }
 
 export async function toggleReadyStatus(debateId: string): Promise<void> {
