@@ -18,4 +18,5 @@ export type DebateStatus =
     | "WAITING_FOR_OPPONENT"
     | "DONE"
     | "CANCELED"
-    | "ONGOING";
+    | "ONGOING"
+    | "WAITING_FOR_READY";

@@ -17,7 +17,7 @@ public class InMemoryDebateRepository implements DebateRepository {
 
     @Override
     public void save(Debate debate) {
-        debates.put(debate.getId(), debate);
+        debates.put(debate.getId(), copy(debate));
     }
 
     @Override
@@ -29,7 +29,8 @@ public class InMemoryDebateRepository implements DebateRepository {
                 .sorted(Comparator.comparing(Debate::getId))
                 .toList();
         return new PagedResult<>(
-                orderedDebates.stream().skip((long) page * size).limit(size).toList(),
+                orderedDebates.stream().skip((long) page * size).limit(size)
+                        .map(InMemoryDebateRepository::copy).toList(),
                 page,
                 size,
                 orderedDebates.size(),
@@ -38,7 +39,7 @@ public class InMemoryDebateRepository implements DebateRepository {
     }
 
     @Override
-    public boolean existsByCreatorIdAndStatusIn(UUID creatorId, Set<DebateStatus> statuses) {
+    public boolean existsByParticipantIdAndStatusIn(UUID creatorId, Set<DebateStatus> statuses) {
         return debates.values().stream()
                 .anyMatch(debate -> debate.getParticipants().stream()
                         .anyMatch(participant -> participant.userId().equals(creatorId)) &&
@@ -47,6 +48,26 @@ public class InMemoryDebateRepository implements DebateRepository {
 
     @Override
     public Optional<Debate> findById(UUID debateId) {
-        return Optional.ofNullable(debates.get(debateId));
+        return Optional.ofNullable(debates.get(debateId)).map(InMemoryDebateRepository::copy);
+    }
+
+    @Override
+    public Optional<Debate> findByIdForUpdate(UUID debateId) {
+        // This fake does not simulate database locks or transactions.
+        return findById(debateId);
+    }
+
+    // Keep stored state isolated: changes become visible only through save().
+    private static Debate copy(Debate debate) {
+        return new Debate.ReconstructBuilder(
+                debate.getId(), debate.getProposition(), debate.getDescription(),
+                debate.getCreatedAt(), debate.getCreatorId())
+                .withStatus(debate.getStatus())
+                .withParticipants(debate.getParticipants())
+                .withUpdatedAt(debate.getUpdatedAt())
+                .withStartedAt(debate.getStartedAt())
+                .withEndedAt(debate.getEndedAt())
+                .withFormat(debate.getFormat())
+                .build();
     }
 }

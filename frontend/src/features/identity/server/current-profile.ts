@@ -3,6 +3,7 @@ import "server-only";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { z } from "zod";
+import { ApiError } from "@/lib/apis/api-error";
 import { backendFetch } from "@/lib/apis/backend-fetch";
 
 const profileSchema = z.object({
@@ -24,18 +25,18 @@ export async function getCurrentProfile(): Promise<ProfileState> {
         );
 
         if (response.status === 401) return { status: "unauthorized" };
-        if (response.status === 403) {
-            const error = await response.json();
-            if (error.code === "ONBOARDING_REQUIRED")
+        if (!response.ok) {
+            const error = await ApiError.fromResponse(response);
+            if (error.status === 403 && error.code === "ONBOARDING_REQUIRED")
                 return { status: "missing" };
+            return { status: "error" };
         }
-        if (!response.ok) return { status: "error" };
 
         const profile = profileSchema.parse(await response.json());
 
         return { status: "ready", profile };
     } catch (error) {
-        console.error("Error occurred while fetching current profile:", error);
+        ApiError.fromUnknown(error);
         return { status: "error" };
     }
 }

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter, Newsreader } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/header";
+import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
@@ -43,12 +44,16 @@ export default function RootLayout({
                 inter.variable,
             )}
         >
-            <body className="min-h-screen flex flex-col flex-1 items-center max-w-6xl xl:max-w-7xl mx-auto w-full justify-center">
+            <body className="min-h-screen flex flex-col flex-1 items-center  w-full justify-center">
                 <Header />
 
-                {children}
+                <div className="max-w-6xl w-full xl:max-w-7xl mx-auto flex-1">
+                    {children}
+                </div>
 
-                <footer className="w-full">
+                <Toaster position="top-right" />
+
+                <footer className="w-full bg-card">
                     <div className="flex items-center justify-between p-8 border-t border-t-primary/10 py-4">
                         <p className="text-muted-foreground text-sm">
                             Peithyra &copy; {new Date().getFullYear()} - Tous

@@ -4,6 +4,7 @@ import {
     RegisterLink,
 } from "@kinde-oss/kinde-auth-nextjs/components";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 export async function Header() {
@@ -11,9 +12,13 @@ export async function Header() {
     const authenticated = await isAuthenticated();
 
     return (
-        <header className="w-full">
-            <nav className="flex items-center justify-between p-8 border-b border-b-primary/10 py-4">
-                <span className="text-xl sm:text-2xl font-bold">Peithyra</span>
+        <header className="w-full bg-card">
+            <nav className="flex items-center bg-card max-w-6xl xl:max-w-7xl justify-between p-8 border-b border-b-primary/10 py-4 mx-auto">
+                <Link href="/">
+                    <span className="text-xl sm:text-2xl font-bold">
+                        Peithyra
+                    </span>
+                </Link>
                 <div className="flex gap-1 sm:gap-4">
                     {authenticated ? (
                         <LogoutLink>

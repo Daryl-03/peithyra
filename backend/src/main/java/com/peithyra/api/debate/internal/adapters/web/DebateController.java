@@ -1,10 +1,14 @@
 package com.peithyra.api.debate.internal.adapters.web;
 
 import com.peithyra.api.debate.internal.adapters.web.dto.CreateDebateRequest;
+import com.peithyra.api.debate.internal.adapters.web.dto.JoinDebateRequest;
 import com.peithyra.api.debate.internal.application.dto.*;
 import com.peithyra.api.debate.internal.application.port.in.CreateDebateUseCase;
+import com.peithyra.api.debate.internal.application.port.in.JoinDebateUseCase;
+import com.peithyra.api.debate.internal.application.port.in.LeaveDebateUseCase;
 import com.peithyra.api.debate.internal.application.port.in.ListDebatesUseCase;
 import com.peithyra.api.debate.internal.application.port.in.ReadDebateUseCase;
+import com.peithyra.api.debate.internal.application.port.in.ToggleParticipantReadyUseCase;
 import com.peithyra.api.identity.UserView;
 import com.peithyra.api.identity.web.CurrentUser;
 import jakarta.validation.Valid;
@@ -23,11 +27,17 @@ public class DebateController {
     private final CreateDebateUseCase createDebateUseCase;
     private final ListDebatesUseCase listDebatesUseCase;
     private final ReadDebateUseCase readDebateUseCase;
+    private final JoinDebateUseCase joinDebateUseCase;
+    private final LeaveDebateUseCase leaveDebateUseCase;
+    private final ToggleParticipantReadyUseCase toggleParticipantReadyUseCase;
 
-    public DebateController(CreateDebateUseCase createDebateUseCase, ListDebatesUseCase listDebatesUseCase, ReadDebateUseCase readDebateUseCase) {
+    public DebateController(CreateDebateUseCase createDebateUseCase, ListDebatesUseCase listDebatesUseCase, ReadDebateUseCase readDebateUseCase, JoinDebateUseCase joinDebateUseCase, LeaveDebateUseCase leaveDebateUseCase, ToggleParticipantReadyUseCase toggleParticipantReadyUseCase) {
         this.createDebateUseCase = createDebateUseCase;
         this.listDebatesUseCase = listDebatesUseCase;
         this.readDebateUseCase = readDebateUseCase;
+        this.joinDebateUseCase = joinDebateUseCase;
+        this.leaveDebateUseCase = leaveDebateUseCase;
+        this.toggleParticipantReadyUseCase = toggleParticipantReadyUseCase;
     }
 
     @PostMapping
@@ -50,5 +60,22 @@ public class DebateController {
     public ResponseEntity<DebateDetails> getDebate(@PathVariable UUID debateId){
         var debateSummary = readDebateUseCase.execute(debateId);
         return ResponseEntity.ok().body(debateSummary);
+    }
+
+    @PostMapping("/{debateId}/join")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void joinDebate(@PathVariable UUID debateId, @RequestBody @Valid JoinDebateRequest request, @CurrentUser UserView currentUser) {
+        joinDebateUseCase.execute(request.toCommand(debateId, currentUser.id()));
+    }
+
+    @PostMapping("/{debateId}/leave")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void leaveDebate(@PathVariable UUID debateId, @CurrentUser UserView currentUser) {
+        leaveDebateUseCase.execute(debateId, currentUser.id());
+    }
+    @PostMapping("/{debateId}/ready/toggle")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void toggleParticipantReady(@PathVariable UUID debateId, @CurrentUser UserView currentUser) {
+        toggleParticipantReadyUseCase.execute(debateId, currentUser.id());
     }
 }

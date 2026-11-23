@@ -16,20 +16,23 @@ public class ParticipantJpaEmbeddable {
     private Instant joinedAt;
     @Enumerated(EnumType.STRING)
     private DebateSide side;
+    private boolean isReady;
 
     protected ParticipantJpaEmbeddable() {}
 
-    protected ParticipantJpaEmbeddable(UUID userId, Instant joinedAt, DebateSide side) {
+    protected ParticipantJpaEmbeddable(UUID userId, Instant joinedAt, DebateSide side, boolean isReady) {
         this.userId = userId;
         this.joinedAt = joinedAt;
         this.side = side;
+        this.isReady = isReady;
     }
 
     public static ParticipantJpaEmbeddable fromDomain(Participant participant) {
         return new ParticipantJpaEmbeddable(
                 participant.userId(),
                 participant.joinedAt(),
-                participant.side()
+                participant.side(),
+                participant.isReady()
         );
     }
 
@@ -37,7 +40,8 @@ public class ParticipantJpaEmbeddable {
         return new Participant(
                 participantJpaEmbeddable.userId,
                 participantJpaEmbeddable.joinedAt,
-                participantJpaEmbeddable.side
+                participantJpaEmbeddable.side,
+                participantJpaEmbeddable.isReady
         );
     }
 }

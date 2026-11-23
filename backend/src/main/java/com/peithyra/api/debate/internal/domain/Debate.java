@@ -1,7 +1,12 @@
 package com.peithyra.api.debate.internal.domain;
 
-import com.peithyra.api.debate.internal.domain.exceptions.DebateSideAlreadyTakenException;
+import com.peithyra.api.debate.internal.domain.exceptions.DebateSideFullException;
+import com.peithyra.api.debate.internal.domain.exceptions.DebateNotJoinableException;
 import com.peithyra.api.debate.internal.domain.exceptions.ParticipantAlreadyJoinedException;
+
+import com.peithyra.api.debate.internal.domain.exceptions.DebateNotWaitingForReadyException;
+
+import com.peithyra.api.debate.internal.domain.exceptions.ParticipantNotFoundException;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -16,6 +21,7 @@ public class Debate {
     private final String proposition;
     private final String description;
     private DebateStatus status;
+    private final UUID creatorId;
     private final Instant createdAt;
     private Instant updatedAt;
     private Instant startedAt;
@@ -23,18 +29,20 @@ public class Debate {
     private DebateFormat format;
     private final List<Participant> participants;
 
-    public Debate(UUID id, String proposition, String description, DebateFormat format) {
+    public Debate(UUID id, String proposition, String description, DebateFormat format, UUID creatorId) {
         this.id = id;
         this.proposition = proposition;
         this.description = description;
         this.format = format;
+        this.creatorId = creatorId;
         this.createdAt = Instant.now();
         this.updatedAt = Instant.now();
         this.endedAt = null;
         this.status = DebateStatus.WAITING_FOR_OPPONENT;
         this.participants = new ArrayList<>();
     }
-    public Debate(UUID id, String proposition, String description, Instant createdAt){
+
+    private Debate(UUID id, String proposition, String description, Instant createdAt, UUID creatorId) {
         this.id = id;
         this.proposition = proposition;
         this.description = description;
@@ -43,11 +51,13 @@ public class Debate {
         this.endedAt = null;
         this.status = DebateStatus.WAITING_FOR_OPPONENT;
         this.participants = new ArrayList<>();
+        this.creatorId = creatorId;
     }
 
     public void addParticipant(DebateSide side, UUID userId) {
+        Objects.requireNonNull(side, "side is required");
         if (status != DebateStatus.WAITING_FOR_OPPONENT) {
-            throw new IllegalStateException("Cannot add participant to a debate that is not waiting for an opponent.");
+            throw new DebateNotJoinableException("Debate is not available for joining");
         }
 
         boolean alreadyIn = this.participants.stream()
@@ -57,19 +67,125 @@ public class Debate {
             throw new ParticipantAlreadyJoinedException("User is already a participant in this debate.");
         }
 
-        boolean sideAlreadyTaken = this.participants.stream()
-                .anyMatch(p -> p.side().equals(side));
-
-        if (sideAlreadyTaken) {
-            throw new DebateSideAlreadyTakenException("Debate side is already taken.");
+        if (isSideFull(side)) {
+            throw new DebateSideFullException("Debate side is full.");
         }
 
         this.participants.add(new Participant(userId, Instant.now(), side));
 
-        if (this.participants.size() == 2) {
-            this.status = DebateStatus.ONGOING;
-            this.startedAt = Instant.now();
+        refreshWaitingStatus();
+        this.updatedAt = Instant.now();
+    }
+
+    public void cancel(UUID userId) {
+        requireWaitingDebate();
+        requireParticipant(userId);
+        if (!creatorId.equals(userId)) {
+            throw new IllegalArgumentException("Only the creator can cancel this debate.");
         }
+
+        status = DebateStatus.CANCELED;
+        updatedAt = Instant.now();
+    }
+
+    public void removeParticipant(UUID userId) {
+        requireWaitingDebate();
+        requireParticipant(userId);
+        if (creatorId.equals(userId)) {
+            throw new IllegalArgumentException("The creator must cancel the debate instead of leaving.");
+        }
+
+        participants.removeIf(participant -> participant.userId().equals(userId));
+        participants.replaceAll(participant -> new Participant(
+                participant.userId(), participant.joinedAt(), participant.side(), false
+        ));
+        refreshWaitingStatus();
+        updatedAt = Instant.now();
+    }
+
+    private void requireWaitingDebate() {
+        if (status != DebateStatus.WAITING_FOR_OPPONENT && status != DebateStatus.WAITING_FOR_READY) {
+            throw new IllegalStateException("Participants can only leave or cancel a debate before it starts.");
+        }
+    }
+
+    private void requireParticipant(UUID userId) {
+        if (participants.stream().noneMatch(participant -> participant.userId().equals(userId))) {
+            throw new IllegalArgumentException("User is not a participant in this debate.");
+        }
+    }
+
+    public void toggleParticipantReady(UUID userId) {
+        if (status != DebateStatus.WAITING_FOR_READY) {
+            throw new DebateNotWaitingForReadyException(
+                    "Debate is not waiting for participants to be ready.");
+        }
+        Participant participant = participants.stream()
+                .filter(candidate -> candidate.userId().equals(userId))
+                .findFirst()
+                .orElseThrow(() -> new ParticipantNotFoundException(
+                        "User is not a participant in this debate."));
+        participants.set(participants.indexOf(participant), new Participant(
+                participant.userId(), participant.joinedAt(), participant.side(), !participant.isReady()));
+        updatedAt = Instant.now();
+    }
+
+    public void markParticipantReady(UUID userId) {
+        if (status != DebateStatus.WAITING_FOR_READY) {
+            throw new IllegalStateException(
+                    "Debate is not waiting for participants to be ready."
+            );
+        }
+
+        for (int i = 0; i < participants.size(); i++) {
+            Participant participant = participants.get(i);
+
+            if (participant.userId().equals(userId)) {
+                if (participant.isReady()) {
+                    return;
+                }
+
+                participants.set(i, new Participant(
+                        participant.userId(),
+                        participant.joinedAt(),
+                        participant.side(),
+                        true
+                ));
+                updatedAt = Instant.now();
+                return;
+            }
+        }
+
+        throw new IllegalArgumentException(
+                "User is not a participant in this debate."
+        );
+    }
+
+//    public void startDebate() {
+//        if (this.status != DebateStatus.WAITING_FOR_READY) {
+//            throw new IllegalStateException("Debate cannot be started unless it is waiting for ready.");
+//        }
+//
+//        boolean allReady = this.status == DebateStatus.WAITING_FOR_READY && this.participants.stream().allMatch(Participant::isReady);
+//
+//        if (!allReady) {
+//            throw new IllegalStateException("Cannot start debate until all participants are ready.");
+//        }
+//
+//        this.status = DebateStatus.ONGOING;
+//        this.startedAt = Instant.now();
+//    }
+
+    private boolean isFull() {
+        return this.participants.size() >= format.participantsPerSide() * 2;
+    }
+
+    private boolean isSideFull(DebateSide side) {
+        return participants.stream().filter(p -> p.side() == side).count() >= format.participantsPerSide();
+    }
+
+    private void refreshWaitingStatus() {
+        status = isFull() ? DebateStatus.WAITING_FOR_READY : DebateStatus.WAITING_FOR_OPPONENT;
     }
 
     public List<Participant> getParticipants() {
@@ -112,11 +228,16 @@ public class Debate {
         return format;
     }
 
+    public UUID getCreatorId() {
+        return creatorId;
+    }
+
     public static class ReconstructBuilder {
         private final UUID id;
         private final String proposition;
         private final String description;
         private final Instant createdAt;
+        private final UUID creatorId;
         private DebateStatus status;
         private List<Participant> participants;
         private Instant startedAt;
@@ -124,11 +245,12 @@ public class Debate {
         private Instant updatedAt;
         private DebateFormat format;
 
-        public ReconstructBuilder(UUID id, String proposition, String description, Instant createdAt) {
+        public ReconstructBuilder(UUID id, String proposition, String description, Instant createdAt, UUID creatorId) {
             this.id = id;
             this.proposition = proposition;
             this.description = description;
             this.createdAt = createdAt;
+            this.creatorId = creatorId;
         }
 
         public ReconstructBuilder withStatus(DebateStatus status) {
@@ -170,7 +292,7 @@ public class Debate {
             Objects.requireNonNull(updatedAt, "updatedAt is required for reconstruction");
             Objects.requireNonNull(format, "format is required for reconstruction");
 
-            Debate debate = new Debate(id, proposition, description, createdAt);
+            Debate debate = new Debate(id, proposition, description, createdAt, creatorId);
             debate.status = this.status;
             debate.participants.addAll(this.participants);
             debate.startedAt = this.startedAt;

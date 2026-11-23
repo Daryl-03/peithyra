@@ -47,6 +47,7 @@ public class ListDebatesUseCase {
                                 debate.getId(),
                                 debate.getProposition(),
                                 debate.getStatus(),
+                                debate.getCreatorId(),
                                 debate.getCreatedAt(),
                                 debate.getParticipants().stream()
                                         .map(participant -> new ParticipantSummary(

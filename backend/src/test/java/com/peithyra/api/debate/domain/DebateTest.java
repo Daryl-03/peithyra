@@ -5,10 +5,16 @@ import com.peithyra.api.debate.internal.domain.Debate;
 import com.peithyra.api.debate.internal.domain.DebateFormat;
 import com.peithyra.api.debate.internal.domain.DebateSide;
 import com.peithyra.api.debate.internal.domain.DebateStatus;
-import com.peithyra.api.debate.internal.domain.exceptions.DebateSideAlreadyTakenException;
+import com.peithyra.api.debate.internal.domain.Participant;
+import com.peithyra.api.debate.internal.domain.exceptions.DebateSideFullException;
 import com.peithyra.api.debate.internal.domain.exceptions.ParticipantAlreadyJoinedException;
+import com.peithyra.api.debate.internal.domain.exceptions.DebateNotJoinableException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -22,7 +28,8 @@ public class DebateTest {
                 UUID.randomUUID(),
                 "random prop",
                 "",
-                format
+                format,
+                UUID.randomUUID()
         );
 
         assertAll(
@@ -34,22 +41,24 @@ public class DebateTest {
     }
 
     @Test
-    void shouldStartDebateWhenSecondParticipantJoins() {
+    void shouldPutDebateInWaitingForReadyWhenSecondParticipantJoins() {
         DebateFormat format = new DebateFormat(3, 60);
         Debate debate = new Debate(
                 UUID.randomUUID(),
                 "Naruto is the best manga",
                 "",
-                format
+                format,
+                UUID.randomUUID()
         );
 
         debate.addParticipant(DebateSide.FOR, UUID.randomUUID());
         debate.addParticipant(DebateSide.AGAINST, UUID.randomUUID());
 
         assertAll(
-                () -> assertEquals(DebateStatus.ONGOING, debate.getStatus()),
+                () -> assertEquals(DebateStatus.WAITING_FOR_READY, debate.getStatus()),
                 () -> assertEquals(2, debate.getParticipants().size()),
-                () -> assertNotNull(debate.getStartedAt())
+                () -> assertNull(debate.getStartedAt()),
+                () -> assertTrue(debate.getParticipants().stream().noneMatch(p -> p.isReady()))
         );
     }
 
@@ -60,14 +69,15 @@ public class DebateTest {
                 UUID.randomUUID(),
                 "Training AI on copyrighted data is copyright infringement.",
                 "",
-                format
+                format,
+                UUID.randomUUID()
         );
 
         debate.addParticipant(DebateSide.FOR, UUID.randomUUID());
         debate.addParticipant(DebateSide.AGAINST, UUID.randomUUID());
 
         var randomUserId = UUID.randomUUID();
-        assertThrows(IllegalStateException.class, () -> debate.addParticipant(DebateSide.FOR, randomUserId));
+        assertThrows(DebateNotJoinableException.class, () -> debate.addParticipant(DebateSide.FOR, randomUserId));
     }
 
     @Test
@@ -77,13 +87,14 @@ public class DebateTest {
                 UUID.randomUUID(),
                 "Training AI on copyrighted data is copyright infringement.",
                 "A debate about copyright and artificial intelligence.",
-                format
+                format,
+                UUID.randomUUID()
         );
 
         debate.addParticipant(DebateSide.FOR, UUID.randomUUID());
 
         assertThrows(
-                DebateSideAlreadyTakenException.class,
+                DebateSideFullException.class,
                 () -> debate.addParticipant(DebateSide.FOR, UUID.randomUUID())
         );
 
@@ -104,7 +115,8 @@ public class DebateTest {
                 UUID.randomUUID(),
                 "Training AI on copyrighted data is copyright infringement.",
                 "A debate about copyright and artificial intelligence.",
-                format
+                format,
+                UUID.randomUUID()
         );
 
         debate.addParticipant(DebateSide.FOR, userId);
@@ -113,5 +125,182 @@ public class DebateTest {
                 ParticipantAlreadyJoinedException.class,
                 () -> debate.addParticipant(DebateSide.AGAINST, userId)
         );
+    }
+    @Test
+    void shouldMarkOnlyRequestedParticipantReadyAndPreserveTheirDetails() {
+        Debate debate = debateAwaitingConfirmation(DebateStatus.WAITING_FOR_READY);
+        var original = debate.getParticipants().getLast();
+        var other = debate.getParticipants().getFirst();
+
+        debate.markParticipantReady(original.userId());
+
+        var ready = debate.getParticipants().getLast();
+        assertAll(
+                () -> assertTrue(ready.isReady()),
+                () -> assertEquals(original.userId(), ready.userId()),
+                () -> assertEquals(original.side(), ready.side()),
+                () -> assertEquals(original.joinedAt(), ready.joinedAt()),
+                () -> assertEquals(other, debate.getParticipants().getFirst()),
+                () -> assertTrue(debate.getUpdatedAt().isAfter(Instant.EPOCH)),
+                () -> assertEquals(DebateStatus.WAITING_FOR_READY, debate.getStatus()),
+                () -> assertNull(debate.getStartedAt())
+        );
+    }
+
+    @Test
+    void shouldLeaveStateUnchangedWhenParticipantConfirmsTwice() {
+        Debate debate = debateAwaitingConfirmation(DebateStatus.WAITING_FOR_READY);
+        UUID userId = debate.getParticipants().getFirst().userId();
+        debate.markParticipantReady(userId);
+        var participants = List.copyOf(debate.getParticipants());
+        var updatedAt = debate.getUpdatedAt();
+
+        debate.markParticipantReady(userId);
+
+        assertEquals(participants, debate.getParticipants());
+        assertEquals(updatedAt, debate.getUpdatedAt());
+    }
+
+    @Test
+    void shouldRejectReadinessFromNonParticipantWithoutChangingState() {
+        Debate debate = debateAwaitingConfirmation(DebateStatus.WAITING_FOR_READY);
+        var participants = List.copyOf(debate.getParticipants());
+
+        assertThrows(IllegalArgumentException.class, () -> debate.markParticipantReady(UUID.randomUUID()));
+
+        assertEquals(participants, debate.getParticipants());
+        assertEquals(Instant.EPOCH, debate.getUpdatedAt());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = DebateStatus.class, names = "WAITING_FOR_READY", mode = EnumSource.Mode.EXCLUDE)
+    void shouldRejectReadinessOutsideConfirmationPhase(DebateStatus status) {
+        Debate debate = debateAwaitingConfirmation(status);
+        var participants = List.copyOf(debate.getParticipants());
+
+        assertThrows(IllegalStateException.class,
+                () -> debate.markParticipantReady(participants.getFirst().userId()));
+
+        assertEquals(participants, debate.getParticipants());
+        assertEquals(status, debate.getStatus());
+        assertEquals(Instant.EPOCH, debate.getUpdatedAt());
+    }
+
+    @Test
+    void shouldNotAutomaticallyStartWhenBothParticipantsAreReady() {
+        Debate debate = debateAwaitingConfirmation(DebateStatus.WAITING_FOR_READY);
+        for (var participant : List.copyOf(debate.getParticipants())) {
+            debate.markParticipantReady(participant.userId());
+        }
+
+        assertTrue(debate.getParticipants().stream().allMatch(Participant::isReady));
+        assertEquals(DebateStatus.WAITING_FOR_READY, debate.getStatus());
+        assertNull(debate.getStartedAt());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = DebateStatus.class, names = {"WAITING_FOR_OPPONENT", "WAITING_FOR_READY"})
+    void shouldCancelWithoutRemovingParticipants(DebateStatus status) {
+        Debate debate = debateAwaitingConfirmation(status);
+        var participants = List.copyOf(debate.getParticipants());
+
+        debate.cancel(debate.getCreatorId());
+
+        assertEquals(DebateStatus.CANCELED, debate.getStatus());
+        assertEquals(participants, debate.getParticipants());
+        assertTrue(debate.getUpdatedAt().isAfter(Instant.EPOCH));
+        assertNull(debate.getStartedAt());
+    }
+
+    @Test
+    void shouldRejectCancellationByOpponentOrOutsider() {
+        Debate debate = debateAwaitingConfirmation(DebateStatus.WAITING_FOR_READY);
+        var participants = List.copyOf(debate.getParticipants());
+
+        assertThrows(IllegalArgumentException.class, () -> debate.cancel(participants.getLast().userId()));
+        assertThrows(IllegalArgumentException.class, () -> debate.cancel(UUID.randomUUID()));
+
+        assertEquals(DebateStatus.WAITING_FOR_READY, debate.getStatus());
+        assertEquals(participants, debate.getParticipants());
+        assertEquals(Instant.EPOCH, debate.getUpdatedAt());
+    }
+
+    @Test
+    void shouldRemoveOpponentResetReadinessAndAllowReplacement() {
+        Debate debate = debateAwaitingConfirmation(DebateStatus.WAITING_FOR_READY);
+        var creator = debate.getParticipants().getFirst();
+        var opponent = debate.getParticipants().getLast();
+        debate.markParticipantReady(creator.userId());
+
+        debate.removeParticipant(opponent.userId());
+
+        assertEquals(List.of(creator), debate.getParticipants());
+        assertEquals(DebateStatus.WAITING_FOR_OPPONENT, debate.getStatus());
+        assertTrue(debate.getUpdatedAt().isAfter(Instant.EPOCH));
+        UUID replacementId = UUID.randomUUID();
+        debate.addParticipant(opponent.side(), replacementId);
+        assertEquals(DebateStatus.WAITING_FOR_READY, debate.getStatus());
+        assertEquals(replacementId, debate.getParticipants().getLast().userId());
+        assertTrue(debate.getParticipants().stream().noneMatch(Participant::isReady));
+    }
+
+    @Test
+    void shouldRejectRemovingCreatorOrOutsider() {
+        Debate debate = debateAwaitingConfirmation(DebateStatus.WAITING_FOR_READY);
+        var participants = List.copyOf(debate.getParticipants());
+
+        assertThrows(IllegalArgumentException.class, () -> debate.removeParticipant(debate.getCreatorId()));
+        assertThrows(IllegalArgumentException.class, () -> debate.removeParticipant(UUID.randomUUID()));
+
+        assertEquals(participants, debate.getParticipants());
+        assertEquals(DebateStatus.WAITING_FOR_READY, debate.getStatus());
+        assertEquals(Instant.EPOCH, debate.getUpdatedAt());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = DebateStatus.class, names = {"ONGOING", "DONE", "CANCELED"})
+    void shouldRejectCancellationAndRemovalOutsideWaitingPhase(DebateStatus status) {
+        Debate debate = debateAwaitingConfirmation(status);
+        var participants = List.copyOf(debate.getParticipants());
+
+        assertThrows(IllegalStateException.class, () -> debate.cancel(debate.getCreatorId()));
+        assertThrows(IllegalStateException.class, () -> debate.removeParticipant(participants.getLast().userId()));
+
+        assertEquals(status, debate.getStatus());
+        assertEquals(participants, debate.getParticipants());
+        assertEquals(Instant.EPOCH, debate.getUpdatedAt());
+    }
+
+    @ParameterizedTest
+    @EnumSource(DebateSide.class)
+    void shouldAllowTeammatesUntilSideCapacityAndWaitForBothTeams(DebateSide side) {
+        UUID creatorId = UUID.randomUUID();
+        Debate debate = new Debate(UUID.randomUUID(), "Team debate", "", new DebateFormat(3, 60, 2), creatorId);
+        debate.addParticipant(side, creatorId);
+        debate.addParticipant(side, UUID.randomUUID());
+        assertEquals(DebateStatus.WAITING_FOR_OPPONENT, debate.getStatus());
+
+        assertThrows(DebateSideFullException.class, () -> debate.addParticipant(side, UUID.randomUUID()));
+        assertEquals(2, debate.getParticipants().size());
+
+        DebateSide other = side == DebateSide.FOR ? DebateSide.AGAINST : DebateSide.FOR;
+        debate.addParticipant(other, UUID.randomUUID());
+        assertEquals(DebateStatus.WAITING_FOR_OPPONENT, debate.getStatus());
+        debate.addParticipant(other, UUID.randomUUID());
+        assertEquals(DebateStatus.WAITING_FOR_READY, debate.getStatus());
+        assertNull(debate.getStartedAt());
+    }
+
+    private Debate debateAwaitingConfirmation(DebateStatus status) {
+        UUID creatorId = UUID.randomUUID();
+        var creator = new Participant(creatorId, Instant.EPOCH, DebateSide.FOR);
+        var opponent = new Participant(UUID.randomUUID(), Instant.EPOCH, DebateSide.AGAINST);
+        return new Debate.ReconstructBuilder(UUID.randomUUID(), "A proposition", "", Instant.EPOCH, creatorId)
+                .withStatus(status)
+                .withParticipants(status == DebateStatus.WAITING_FOR_OPPONENT
+                        ? List.of(creator) : List.of(creator, opponent))
+                .withUpdatedAt(Instant.EPOCH)
+                .withFormat(new DebateFormat(3, 60))
+                .build();
     }
 }

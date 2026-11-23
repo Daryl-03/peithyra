@@ -36,7 +36,8 @@ public class ReadDebateUseCaseTest {
                 creatorId,
                 "Moral and law are two separate matters",
                 "A debate about moral and legal principles.",
-                new DebateFormat(3, 60)
+                new DebateFormat(3, 60),
+                creatorId
         );
         debate.addParticipant(DebateSide.FOR, creatorId);
         debateRepository.save(debate);

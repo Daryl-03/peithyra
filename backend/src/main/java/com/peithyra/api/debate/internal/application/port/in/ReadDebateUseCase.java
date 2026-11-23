@@ -1,7 +1,7 @@
 package com.peithyra.api.debate.internal.application.port.in;
 
 import com.peithyra.api.debate.internal.application.dto.DebateDetails;
-import com.peithyra.api.debate.internal.application.dto.ParticipantSummary;
+import com.peithyra.api.debate.internal.application.dto.ParticipantDetails;
 import com.peithyra.api.debate.internal.application.exception.DebateNotFoundException;
 import com.peithyra.api.debate.internal.application.port.out.DebateRepository;
 import com.peithyra.api.debate.internal.application.port.out.UserPort;
@@ -37,12 +37,14 @@ public class ReadDebateUseCase {
                 debate.getDescription(),
                 debate.getStatus(),
                 debate.getFormat(),
+                debate.getCreatorId(),
                 debate.getCreatedAt(),
                 debate.getParticipants().stream()
-                        .map(participant -> new ParticipantSummary(
+                        .map(participant -> new ParticipantDetails(
                                 participant.userId(),
                                 participantUsernames.getOrDefault(participant.userId(), "unknown"),
-                                participant.side()
+                                participant.side(),
+                                participant.isReady()
                         ))
                         .toList()
         );

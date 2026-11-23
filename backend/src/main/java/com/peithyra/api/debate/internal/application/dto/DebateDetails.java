@@ -13,7 +13,8 @@ public record DebateDetails(
         String description,
         DebateStatus status,
         DebateFormat format,
+        UUID creatorId,
         Instant createdAt,
-        List<ParticipantSummary> participants
+        List<ParticipantDetails> participants
 ) {
 }

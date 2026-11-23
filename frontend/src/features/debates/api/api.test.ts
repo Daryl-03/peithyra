@@ -91,7 +91,14 @@ describe("getDebateById", () => {
                 turnTimeLimitSeconds: 120,
             },
             createdAt: "2026-11-09T12:00:00Z",
-            participants: [{ id: "user-1", username: "user1", side: "FOR" }],
+            participants: [
+                {
+                    id: "user-1",
+                    username: "user1",
+                    side: "FOR",
+                    isReady: false,
+                },
+            ],
         };
         fetchMock.mockResolvedValue(Response.json(debate));
 

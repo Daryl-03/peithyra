@@ -23,11 +23,11 @@ public class CreateDebateUseCase {
 
     public CreateDebateResponse execute(CreateDebateCommand command) {
 
-        if (repository.existsByCreatorIdAndStatusIn(command.creatorId(), Set.of(DebateStatus.WAITING_FOR_OPPONENT, DebateStatus.ONGOING))) {
+        if (repository.existsByParticipantIdAndStatusIn(command.creatorId(), Set.of(DebateStatus.WAITING_FOR_OPPONENT, DebateStatus.ONGOING, DebateStatus.WAITING_FOR_READY))) {
             throw new DebateAlreadyOngoingException("User already has a debate in progress");
         }
 
-        Debate debate = new Debate(UUID.randomUUID(), command.proposition(), command.description(), command.format());
+        Debate debate = new Debate(UUID.randomUUID(), command.proposition(), command.description(), command.format(), command.creatorId());
 
         debate.addParticipant(
                         command.side(),

@@ -1,4 +1,7 @@
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
+import { unstable_rethrow } from "next/navigation";
 import { DebateSide } from "@/features/agora/models/debate-side";
 import { getDebateById } from "@/features/debates/api/api";
 import type { DebateDetailsDTO } from "@/features/debates/api/debate-details-dto";
@@ -14,17 +17,20 @@ export default async function DebatePage({
     const { id: debateId } = await params;
     const { isAuthenticated } = await getKindeServerSession();
     const authenticated = await isAuthenticated();
-    const profile = await getCurrentProfile();
+    const profileState = await getCurrentProfile();
+    const profileData =
+        profileState.status === "ready"
+            ? profileState.profile
+            : { id: "", username: "unknown" };
     let isUserInDebate = false;
 
     try {
         debate = await getDebateById(debateId);
-        if (profile.status === "ready") {
-            isUserInDebate = debate.participants.some(
-                (participant) => participant.id === profile?.profile.id,
-            );
-        }
-    } catch {
+        isUserInDebate = debate.participants.some(
+            (participant) => participant.id === profileData?.id,
+        );
+    } catch (error) {
+        unstable_rethrow(error);
         return (
             <div className="flex items-center justify-center flex-1">
                 <p role="alert" className="py-8 text-muted-foreground">
@@ -37,11 +43,21 @@ export default async function DebatePage({
     return (
         <main className="w-full space-y-10 flex-1 px-5 py-10 sm:px-8 sm:py-12">
             <section className="flex flex-col gap-10">
-                <p className="text-secondary-foreground">
-                    {" "}
-                    {debate.status === "WAITING_FOR_OPPONENT" &&
-                        "En attente d'un adversaire."}{" "}
-                </p>
+                <div className="flex flex-col  justify-between gap-3">
+                    <Link
+                        href="/agora"
+                        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+                    >
+                        <ArrowLeft className="size-4" />
+                        Retour à l’agora
+                    </Link>
+
+                    {debate.status === "WAITING_FOR_OPPONENT" && (
+                        <p className="text-md text-secondary-foreground">
+                            En attente d’un adversaire
+                        </p>
+                    )}
+                </div>
                 <h1 className="text-3xl sm:text-5xl font-bold sm:w-[70%]">
                     {debate.proposition}
                 </h1>
@@ -121,6 +137,19 @@ export default async function DebatePage({
                     </div>
 
                     <DebateParticipation
+                        debateId={debateId}
+                        availableSide={
+                            !debate.participants.some(
+                                (participant) => participant.side === "FOR",
+                            )
+                                ? "FOR"
+                                : !debate.participants.some(
+                                        (participant) =>
+                                            participant.side === "AGAINST",
+                                    )
+                                  ? "AGAINST"
+                                  : null
+                        }
                         status={debate.status}
                         isParticipant={isUserInDebate}
                         authenticated={authenticated}

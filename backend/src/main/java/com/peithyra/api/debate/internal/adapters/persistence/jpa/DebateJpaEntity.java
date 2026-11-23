@@ -22,12 +22,14 @@ public class DebateJpaEntity {
     private String description;
     @Enumerated(EnumType.STRING)
     private DebateStatus status;
+    private UUID creatorId;
     private Instant createdAt;
     private Instant updatedAt;
     private Instant startedAt;
     private Instant endedAt;
     private int numberOfTurns;
     private int turnTimeLimitSeconds;
+    private int participantsPerSide;
 
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(
@@ -56,13 +58,14 @@ public class DebateJpaEntity {
         entity.proposition = debate.getProposition();
         entity.description = debate.getDescription();
         entity.status = debate.getStatus();
+        entity.creatorId = debate.getCreatorId();
         entity.createdAt = debate.getCreatedAt();
         entity.updatedAt = debate.getUpdatedAt();
         entity.startedAt = debate.getStartedAt();
         entity.endedAt = debate.getEndedAt();
         entity.numberOfTurns = debate.getFormat().numberOfTurns();
         entity.turnTimeLimitSeconds = debate.getFormat().turnTimeLimitSeconds();
-
+        entity.participantsPerSide = debate.getFormat().participantsPerSide();
         entity.participants = debate.getParticipants().stream()
                 .map(ParticipantJpaEmbeddable::fromDomain)
                 .toList();
@@ -84,7 +87,8 @@ public class DebateJpaEntity {
                 entity.id,
                 entity.proposition,
                 entity.description,
-                entity.createdAt
+                entity.createdAt,
+                entity.creatorId
         )
                 .withStatus(entity.status)
                 .withParticipants(entity.participants.stream()
@@ -96,7 +100,8 @@ public class DebateJpaEntity {
                 .withFormat(
                         new DebateFormat(
                                 entity.numberOfTurns,
-                                entity.turnTimeLimitSeconds
+                                entity.turnTimeLimitSeconds,
+                                entity.participantsPerSide
                         )
                 )
                 .build();

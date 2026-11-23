@@ -10,6 +10,7 @@ public record DebateSummary(
         UUID id,
         String proposition,
         DebateStatus status,
+        UUID creatorId,
         Instant createdAt,
         List<ParticipantSummary> participantViewList
 ) {
